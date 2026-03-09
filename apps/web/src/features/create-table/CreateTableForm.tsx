@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { CreateTableRequestSchema, type CreateTableRequest } from '@bill/shared';
 import { createTable } from '../../lib/api/tables';
+import { markAsManager } from '../../lib/manager';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ApiError } from '../../lib/api/client';
@@ -22,6 +23,7 @@ export function CreateTableForm() {
   const mutation = useMutation({
     mutationFn: createTable,
     onSuccess: (table) => {
+      markAsManager(table.tableId);
       navigate(`/tables/${table.tableId}/scan`);
     },
   });

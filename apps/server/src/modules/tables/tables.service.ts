@@ -1,18 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Table } from '@bill/shared';
+import { Table, ExtractionSnapshot } from '@bill/shared';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TablesService {
   private readonly tables = new Map<string, Table>();
+  private readonly codeIndex = new Map<string, string>(); // code → tableId
+
+  private generateUniqueCode(): string {
+    let code: string;
+    do {
+      code = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    } while (this.codeIndex.has(code));
+    return code;
+  }
 
   createTable(groupName: string): Table {
+    const code = this.generateUniqueCode();
     const table: Table = {
       tableId: uuidv4(),
       groupName,
       createdAt: new Date().toISOString(),
+      code,
     };
     this.tables.set(table.tableId, table);
+    this.codeIndex.set(code, table.tableId);
     return table;
   }
 
@@ -25,5 +37,21 @@ export class TablesService {
       });
     }
     return table;
+  }
+
+  getTableByCode(code: string): Table {
+    const tableId = this.codeIndex.get(code);
+    if (!tableId) {
+      throw new NotFoundException({
+        code: 'TABLE_NOT_FOUND',
+        message: `No table found with code ${code}`,
+      });
+    }
+    return this.getTable(tableId);
+  }
+
+  saveExtraction(tableId: string, extraction: ExtractionSnapshot): void {
+    const table = this.getTable(tableId);
+    this.tables.set(tableId, { ...table, extraction });
   }
 }

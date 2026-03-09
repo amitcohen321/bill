@@ -1,8 +1,35 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from '../components/ui/Button';
+import { getTableByCode } from '../lib/api/tables';
+import { ApiError } from '../lib/api/client';
 
 export function HomePage() {
   const navigate = useNavigate();
+  const [code, setCode] = useState('');
+  const [joinError, setJoinError] = useState<string | null>(null);
+
+  const joinMutation = useMutation({
+    mutationFn: getTableByCode,
+    onSuccess: (table) => {
+      navigate(`/tables/${table.tableId}`);
+    },
+    onError: (err) => {
+      setJoinError(
+        err instanceof ApiError ? 'קוד שולחן לא נמצא. נסה שוב.' : 'שגיאה. נסה שוב.',
+      );
+    },
+  });
+
+  function handleCodeChange(value: string) {
+    setJoinError(null);
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    setCode(digits);
+    if (digits.length === 4) {
+      joinMutation.mutate(digits);
+    }
+  }
 
   return (
     <div className="min-h-screen-safe flex flex-col bg-surface overflow-hidden">
@@ -14,11 +41,9 @@ export function HomePage() {
 
       <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-12">
         {/* Top — logo / branding */}
-        <div className="flex flex-col items-center gap-3 mt-8">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-brand flex items-center justify-center shadow-glow">
-            <BillIcon />
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Bill Split</h1>
+        <div className="flex flex-col items-center gap-3" style={{ marginTop: '10px' }}>
+          <img src="/logo.png" alt="Bill" className="w-56 h-56 object-contain" />
+          <h1 className="text-3xl font-bold text-white tracking-tight">ביל</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
           </p>
@@ -31,16 +56,46 @@ export function HomePage() {
           <FeatureRow icon="✂️" text="פיצול קל בין כולם" />
         </div>
 
-        {/* Bottom — CTA */}
-        <div className="w-full max-w-sm">
-          <Button
-            size="lg"
-            fullWidth
-            onClick={() => navigate('/create-table')}
-          >
+        {/* Bottom — CTAs */}
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          <Button size="lg" fullWidth onClick={() => navigate('/create-table')}>
             צור שולחן
           </Button>
-          <p className="text-center text-white/30 text-xs mt-4">
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-surface-border" />
+            <span className="text-white/30 text-xs">או הצטרף לשולחן קיים</span>
+            <div className="flex-1 h-px bg-surface-border" />
+          </div>
+
+          {/* Code entry */}
+          <div className="flex flex-col gap-2">
+            <div className={[
+              'flex items-center rounded-2xl border bg-surface-elevated px-4 gap-3 transition-colors',
+              joinError ? 'border-red-500/50' : 'border-surface-border focus-within:border-accent/40',
+            ].join(' ')}>
+              <span className="text-white/30 text-sm shrink-0">קוד שולחן</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={code}
+                onChange={(e) => handleCodeChange(e.target.value)}
+                placeholder="0000"
+                className="flex-1 bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-3.5 outline-none placeholder-white/15"
+              />
+              {joinMutation.isPending && (
+                <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />
+              )}
+            </div>
+
+            {joinError && (
+              <p className="text-red-400 text-sm text-center">{joinError}</p>
+            )}
+          </div>
+
+          <p className="text-center text-white/30 text-xs">
             ללא הרשמה · ללא חשבון · מיידי
           </p>
         </div>
@@ -55,18 +110,5 @@ function FeatureRow({ icon, text }: { icon: string; text: string }) {
       <span className="text-2xl">{icon}</span>
       <span className="text-white/80 font-medium">{text}</span>
     </div>
-  );
-}
-
-function BillIcon() {
-  return (
-    <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={1.5}
-        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-      />
-    </svg>
   );
 }

@@ -20,6 +20,11 @@ export class TablesController {
     return this.tablesService.createTable(result.data.groupName);
   }
 
+  @Get('by-code/:code')
+  getTableByCode(@Param('code') code: string) {
+    return this.tablesService.getTableByCode(code);
+  }
+
   @Get(':tableId')
   getTable(@Param('tableId') tableId: string) {
     return this.tablesService.getTable(tableId);

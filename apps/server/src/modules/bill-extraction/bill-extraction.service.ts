@@ -60,10 +60,14 @@ export class BillExtractionService {
       warnings.push('No items could be extracted from the bill image');
     }
 
+    const currency = extractionResult.currency ?? DEFAULT_CURRENCY;
+
+    this.tablesService.saveExtraction(tableId, { items, currency, warnings });
+
     return {
       tableId,
       items,
-      currency: extractionResult.currency ?? DEFAULT_CURRENCY,
+      currency,
       warnings,
     };
   }
