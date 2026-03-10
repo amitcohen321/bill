@@ -8,13 +8,14 @@ import { getTable } from '../lib/api/tables';
 export function BillScanPage() {
   const { tableId } = useParams<{ tableId: string }>();
 
-  if (!tableId) return <Navigate to="/" replace />;
-  if (!isManager(tableId)) return <Navigate to={`/tables/${tableId}`} replace />;
-
   const { data: table } = useQuery({
     queryKey: ['table', tableId],
-    queryFn: () => getTable(tableId),
+    queryFn: () => getTable(tableId!),
+    enabled: !!tableId,
   });
+
+  if (!tableId) return <Navigate to="/" replace />;
+  if (!isManager(tableId)) return <Navigate to={`/tables/${tableId}`} replace />;
 
   return (
     <PageLayout showBack title="סריקת חשבון">

@@ -7,6 +7,7 @@ import { TipSelector } from '../features/bill-review/TipSelector';
 import { SelectionBar } from '../features/bill-review/SelectionBar';
 import { getTable } from '../lib/api/tables';
 import { isManager } from '../lib/manager';
+import { TableCodeBadge } from '../components/ui/TableCodeBadge';
 
 export function GuestTablePage() {
   const { tableId } = useParams<{ tableId: string }>();
@@ -45,6 +46,7 @@ export function GuestTablePage() {
     <>
       <PageLayout title={table?.groupName ?? 'שולחן'}>
         <div className="flex flex-col gap-6 mt-6 pb-32">
+          {table?.code && <TableCodeBadge code={table.code} />}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
