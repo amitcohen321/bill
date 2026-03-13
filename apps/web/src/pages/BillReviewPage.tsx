@@ -21,6 +21,7 @@ export function BillReviewPage() {
   const state = location.state as LocationState | null;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [portions, setPortions] = useState<Map<string, number>>(new Map());
   const [tipPercent, setTipPercent] = useState(0);
 
   if (!tableId || !state?.extraction) {
@@ -30,20 +31,21 @@ export function BillReviewPage() {
   const { extraction } = state;
 
   function handleToggle(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+    if (selectedIds.has(id)) {
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+      setPortions((prev) => { const next = new Map(prev); next.delete(id); return next; });
+    } else {
+      setSelectedIds((prev) => new Set(prev).add(id));
+    }
+  }
+
+  function handlePortionChange(id: string, portion: number) {
+    setPortions((prev) => new Map(prev).set(id, portion));
   }
 
   const selectedTotal = extraction.items
     .filter((item) => selectedIds.has(item.id))
-    .reduce((sum, item) => sum + item.price, 0);
+    .reduce((sum, item) => sum + item.price * (portions.get(item.id) ?? 1), 0);
 
   return (
     <>
@@ -63,6 +65,8 @@ export function BillReviewPage() {
             warnings={extraction.warnings}
             selectedIds={selectedIds}
             onToggle={handleToggle}
+            portions={portions}
+            onPortionChange={handlePortionChange}
           />
 
           <TipSelector tipPercent={tipPercent} onTipChange={setTipPercent} />
