@@ -1,11 +1,8 @@
 import { useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { CreateTableRequestSchema, type CreateTableRequest, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_BYTES } from '@bill/shared';
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_BYTES } from '@bill/shared';
 import { PageLayout } from '../components/ui/PageLayout';
-import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { ApiError } from '../lib/api/client';
 import { createTable, uploadBillImage } from '../lib/api/tables';
@@ -20,17 +17,9 @@ export function CreateTablePage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<CreateTableRequest>({
-    resolver: zodResolver(CreateTableRequestSchema),
-  });
-
   const mutation = useMutation({
-    mutationFn: async ({ groupName, file }: { groupName: string; file: File }) => {
-      const table = await createTable({ groupName });
+    mutationFn: async (file: File) => {
+      const table = await createTable();
       markAsManager(table.tableId);
       const extraction = await uploadBillImage(table.tableId, file);
       return { table, extraction };
@@ -59,30 +48,20 @@ export function CreateTablePage() {
     if (file) handleFileSelected(file);
   };
 
-  const onSubmit = (data: CreateTableRequest) => {
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!selectedFile) {
       setFileError('יש לצלם או לבחור תמונה של החשבון.');
       return;
     }
-    mutation.mutate({ groupName: data.groupName, file: selectedFile });
+    mutation.mutate(selectedFile);
   };
 
   const isPending = mutation.isPending;
 
   return (
     <PageLayout showBack title="שולחן חדש">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 mt-6">
-        {/* Table name */}
-        <Input
-          label="שם השולחן / הקבוצה"
-          placeholder="למשל: חגיגת יום הולדת של דנה"
-          error={errors.groupName?.message}
-          autoFocus
-          autoComplete="off"
-          disabled={isPending}
-          {...register('groupName')}
-        />
-
+      <form onSubmit={onSubmit} className="flex flex-col gap-6 mt-6">
         {/* Bill image */}
         <div className="flex flex-col gap-3">
           <span className="text-white/60 text-sm font-medium">תמונת החשבון</span>

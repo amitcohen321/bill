@@ -15,11 +15,10 @@ export class TablesService {
     return code;
   }
 
-  createTable(groupName: string): Table {
+  createTable(): Table {
     const code = this.generateUniqueCode();
     const table: Table = {
       tableId: uuidv4(),
-      groupName,
       createdAt: new Date().toISOString(),
       code,
     };

@@ -1,8 +1,8 @@
-import type { Table, BillExtractionResponse, CreateTableRequest } from '@bill/shared';
+import type { Table, BillExtractionResponse } from '@bill/shared';
 import { post, postFormData, get } from './client';
 
-export function createTable(data: CreateTableRequest): Promise<Table> {
-  return post<Table>('/tables', data);
+export function createTable(): Promise<Table> {
+  return post<Table>('/tables');
 }
 
 export function getTable(tableId: string): Promise<Table> {

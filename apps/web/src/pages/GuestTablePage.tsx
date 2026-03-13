@@ -46,7 +46,7 @@ export function GuestTablePage() {
 
   return (
     <>
-      <PageLayout title={table?.groupName ?? 'שולחן'}>
+      <PageLayout title="שולחן">
         <div className="flex flex-col gap-6 mt-6 pb-32">
           {table?.code && <TableCodeBadge code={table.code} />}
           {isLoading && (
