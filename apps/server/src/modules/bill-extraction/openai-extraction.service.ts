@@ -20,7 +20,7 @@ export class OpenAIExtractionService {
     const base64Image = imageBuffer.toString('base64');
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract all dish/food line items and their prices.
+    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract all dish/food line items and their prices, and classify each item into a category.
 
 Rules:
 - Extract only individual dish or food item names and their prices
@@ -29,12 +29,18 @@ Rules:
 - If a price is missing or unreadable for an item, include the item with price 0 and add a warning
 - If the same item appears multiple times, include each occurrence separately
 - Detect the currency if possible (default to ILS if unclear)
+- Classify each item into exactly one category: "starter", "main", "dessert", "drink", or "other"
+  - "starter": appetizers, soups, salads, bread, dips served before the main course
+  - "main": main dishes, entrees, burgers, pasta, pizza, grills, sandwiches
+  - "dessert": sweets, cakes, ice cream, pastries served after the main course
+  - "drink": any beverage — water, juice, soda, alcohol, coffee, tea
+  - "other": anything that does not clearly fit the above categories
 - Return ONLY valid JSON, no explanation text
 
 Response format:
 {
   "items": [
-    { "name": "string", "price": number }
+    { "name": "string", "price": number, "category": "starter" | "main" | "dessert" | "drink" | "other" }
   ],
   "currency": "ILS",
   "warnings": []
@@ -44,7 +50,38 @@ Response format:
 
     const response = await this.client.chat.completions.create({
       model: this.model,
-      response_format: { type: 'json_object' },
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'bill_extraction',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              items: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    price: { type: 'number' },
+                    category: {
+                      type: 'string',
+                      enum: ['starter', 'main', 'dessert', 'drink', 'other'],
+                    },
+                  },
+                  required: ['name', 'price', 'category'],
+                  additionalProperties: false,
+                },
+              },
+              currency: { type: 'string' },
+              warnings: { type: 'array', items: { type: 'string' } },
+            },
+            required: ['items', 'currency', 'warnings'],
+            additionalProperties: false,
+          },
+        },
+      },
       messages: [
         {
           role: 'system',
@@ -72,7 +109,7 @@ Response format:
       throw new Error('OpenAI returned empty response');
     }
 
-    this.logger.log('Received response from OpenAI, parsing...');
+    this.logger.log(`Received response from OpenAI: ${rawContent.slice(0, 300)}`);
 
     let parsed: unknown;
     try {

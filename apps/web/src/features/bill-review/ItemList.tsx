@@ -1,6 +1,23 @@
 import { useState } from 'react';
-import type { BillItem } from '@bill/shared';
+import type { BillItem, ItemCategory } from '@bill/shared';
+import { ITEM_CATEGORIES } from '@bill/shared';
 import { Card } from '../../components/ui/Card';
+
+const CATEGORY_LABELS: Record<ItemCategory, string> = {
+  starter: 'מנות פתיחה',
+  main: 'עיקריות',
+  dessert: 'קינוחים',
+  drink: 'שתייה',
+  other: 'אחר',
+};
+
+const CATEGORY_EMOJI: Record<ItemCategory, string> = {
+  starter: '🥗',
+  main: '🍽️',
+  dessert: '🍰',
+  drink: '🥤',
+  other: '📦',
+};
 
 const DUPE_COLORS = [
   '#60a5fa', // blue
@@ -188,6 +205,11 @@ export function ItemList({ items, currency, warnings, selectedIds, onToggle, por
     );
   }
 
+  const grouped = ITEM_CATEGORIES.map((cat) => ({
+    category: cat,
+    items: items.filter((item) => (item.category ?? 'other') === cat),
+  })).filter((g) => g.items.length > 0);
+
   return (
     <div className="flex flex-col gap-4">
       {warnings.length > 0 && (
@@ -200,20 +222,28 @@ export function ItemList({ items, currency, warnings, selectedIds, onToggle, por
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        {items.map((item) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            selected={selectedIds.has(item.id)}
-            dupeColor={dupeColors.get(item.id)}
-            currencySymbol={currencySymbol}
-            portion={portions?.get(item.id) ?? 1}
-            onToggle={() => onToggle(item.id)}
-            onPortionChange={(p) => onPortionChange?.(item.id, p)}
-          />
-        ))}
-      </div>
+      {grouped.map((group) => (
+        <div key={group.category} className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-lg">{CATEGORY_EMOJI[group.category]}</span>
+            <span className="text-white/60 text-sm font-semibold uppercase tracking-wider">
+              {CATEGORY_LABELS[group.category]}
+            </span>
+          </div>
+          {group.items.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              selected={selectedIds.has(item.id)}
+              dupeColor={dupeColors.get(item.id)}
+              currencySymbol={currencySymbol}
+              portion={portions?.get(item.id) ?? 1}
+              onToggle={() => onToggle(item.id)}
+              onPortionChange={(p) => onPortionChange?.(item.id, p)}
+            />
+          ))}
+        </div>
+      ))}
 
       <div className="h-px bg-surface-border" />
 

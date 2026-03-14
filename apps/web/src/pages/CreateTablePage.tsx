@@ -61,26 +61,30 @@ export function CreateTablePage() {
 
   return (
     <PageLayout showBack title="שולחן חדש">
-      <form onSubmit={onSubmit} className="flex flex-col gap-6 mt-6">
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-6">
         {/* Bill image */}
         <div className="flex flex-col gap-3">
-          <span className="text-white/60 text-sm font-medium">תמונת החשבון</span>
+          <span className="text-sm font-medium text-white/60">תמונת החשבון</span>
 
           {preview ? (
             <div className="flex flex-col gap-3">
-              <div className="relative rounded-3xl overflow-hidden border border-surface-border bg-surface-card aspect-[3/4] w-full">
+              <div className="border-surface-border bg-surface-card relative aspect-[3/4] w-full overflow-hidden rounded-3xl border">
                 <img
                   src={preview}
                   alt="תצוגה מקדימה של החשבון"
-                  className="w-full h-full object-contain"
+                  className="h-full w-full object-contain"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
               {!isPending && (
                 <button
                   type="button"
-                  onClick={() => { setPreview(null); setSelectedFile(null); setFileError(null); }}
-                  className="text-sm text-accent hover:text-accent/80 transition-colors font-medium text-center"
+                  onClick={() => {
+                    setPreview(null);
+                    setSelectedFile(null);
+                    setFileError(null);
+                  }}
+                  className="text-accent hover:text-accent/80 text-center text-sm font-medium transition-colors"
                 >
                   החלף תמונה
                 </button>
@@ -89,22 +93,22 @@ export function CreateTablePage() {
           ) : (
             <div className="flex flex-col gap-3">
               <div
-                className="relative rounded-3xl border-2 border-dashed border-surface-border bg-surface-card flex flex-col items-center justify-center gap-4 py-12 px-6 cursor-pointer hover:border-accent/40 transition-colors"
+                className="border-surface-border bg-surface-card hover:border-accent/40 relative flex cursor-pointer flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed px-6 py-12 transition-colors"
                 onClick={() => cameraInputRef.current?.click()}
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-card border border-accent/20 flex items-center justify-center">
+                <div className="bg-gradient-card border-accent/20 flex h-14 w-14 items-center justify-center rounded-2xl border">
                   <CameraIcon />
                 </div>
                 <div className="text-center">
-                  <p className="text-white font-medium">צלם את החשבון</p>
-                  <p className="text-white/40 text-sm mt-1">הקש כדי לפתוח את המצלמה</p>
+                  <p className="font-medium text-white">צלם את החשבון</p>
+                  <p className="mt-1 text-sm text-white/40">הקש כדי לפתוח את המצלמה</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-surface-border" />
-                <span className="text-white/30 text-sm">או</span>
-                <div className="flex-1 h-px bg-surface-border" />
+                <div className="bg-surface-border h-px flex-1" />
+                <span className="text-sm text-white/30">או</span>
+                <div className="bg-surface-border h-px flex-1" />
               </div>
 
               <Button
@@ -120,13 +124,11 @@ export function CreateTablePage() {
             </div>
           )}
 
-          {fileError && (
-            <p className="text-red-400 text-sm">{fileError}</p>
-          )}
+          {fileError && <p className="text-sm text-red-400">{fileError}</p>}
         </div>
 
         {mutation.isError && (
-          <div className="rounded-2xl bg-red-950 border border-red-800/50 p-4 text-red-300 text-sm">
+          <div className="rounded-2xl border border-red-800/50 bg-red-950 p-4 text-sm text-red-300">
             {mutation.error instanceof ApiError
               ? mutation.error.message
               : 'שגיאה ביצירת השולחן. נסה שוב.'}
@@ -134,12 +136,27 @@ export function CreateTablePage() {
         )}
 
         <Button type="submit" size="lg" fullWidth loading={isPending} disabled={isPending}>
-          {isPending ? 'מעבד...' : 'צור שולחן ועבד חשבון'}
+          {isPending ? 'מעבד...' : 'צור חשבון'}
         </Button>
 
         {/* Hidden file inputs */}
-        <input ref={cameraInputRef} type="file" accept={ALLOWED_IMAGE_TYPES.join(',')} capture="environment" onChange={onInputChange} className="hidden" aria-hidden="true" />
-        <input ref={fileInputRef} type="file" accept={ALLOWED_IMAGE_TYPES.join(',')} onChange={onInputChange} className="hidden" aria-hidden="true" />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept={ALLOWED_IMAGE_TYPES.join(',')}
+          capture="environment"
+          onChange={onInputChange}
+          className="hidden"
+          aria-hidden="true"
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ALLOWED_IMAGE_TYPES.join(',')}
+          onChange={onInputChange}
+          className="hidden"
+          aria-hidden="true"
+        />
       </form>
     </PageLayout>
   );
@@ -147,17 +164,32 @@ export function CreateTablePage() {
 
 function CameraIcon() {
   return (
-    <svg className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+    <svg className="text-accent h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+      />
     </svg>
   );
 }
 
 function GalleryIcon() {
   return (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
     </svg>
   );
 }

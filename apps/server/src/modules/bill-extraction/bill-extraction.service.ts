@@ -53,6 +53,7 @@ export class BillExtractionService {
       id: uuidv4(),
       name: item.name,
       price: item.price,
+      category: item.category,
     }));
 
     const warnings = extractionResult.warnings ?? [];
