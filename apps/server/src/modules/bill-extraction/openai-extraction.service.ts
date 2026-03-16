@@ -20,13 +20,18 @@ export class OpenAIExtractionService {
     const base64Image = imageBuffer.toString('base64');
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract all dish/food line items and their prices, and classify each item into a category.
+    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract ONLY the dish/food line items that are EXPLICITLY VISIBLE in the image.
+
+CRITICAL — NEVER HALLUCINATE:
+- ONLY extract items you can actually read in the image. Do NOT guess, infer, or invent any item names or prices.
+- If an item name is unclear or unreadable, use the name "לא נקרא" (do not guess what it might say).
+- If a price is unclear or unreadable, use 0 and add a warning.
+- It is better to return fewer items than to invent items that may not be there.
 
 Rules:
 - Extract only individual dish or food item names and their prices
 - Do NOT include: totals, subtotals, tax, service charges, tips, restaurant name, date, table number, or any other metadata
-- Preserve item names as printed, but clean obvious OCR noise (e.g., remove random special characters)
-- If a price is missing or unreadable for an item, include the item with price 0 and add a warning
+- Preserve item names exactly as printed, but clean obvious OCR noise (e.g., remove random special characters)
 - If the same item appears multiple times, include each occurrence separately
 - Detect the currency if possible (default to ILS if unclear)
 - Classify each item into exactly one category: "starter", "main", "dessert", "drink", or "other"
@@ -96,12 +101,13 @@ Response format:
             },
             {
               type: 'text',
-              text: 'Extract all dish/food items and their prices from this restaurant bill.',
+              text: 'Extract ONLY the dish/food items and prices that are explicitly visible and readable in this bill. Do not invent or guess any items.',
             },
           ],
         },
       ],
       max_tokens: 2000,
+      temperature: 0,
     });
 
     const rawContent = response.choices[0]?.message?.content;
