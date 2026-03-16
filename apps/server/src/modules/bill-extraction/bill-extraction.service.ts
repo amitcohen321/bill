@@ -41,7 +41,7 @@ export class BillExtractionService {
       this.logger.error(`Extraction failed for table ${tableId}`, error);
       throw new InternalServerErrorException({
         code: 'BILL_EXTRACTION_FAILED',
-        message: 'Could not extract items from the uploaded bill image',
+        message: 'לא הצלחנו לעבד את החשבון. אנא נסה שנית.',
       });
     }
 

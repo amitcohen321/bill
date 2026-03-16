@@ -77,7 +77,7 @@ export function BillCapture({ tableId }: BillCaptureProps) {
 
         {mutation.isError && (
           <div className="rounded-2xl bg-red-950 border border-red-800/50 p-4 text-red-300 text-sm">
-            {mutation.error instanceof ApiError
+            {mutation.error instanceof ApiError && mutation.error.code === 'BILL_EXTRACTION_FAILED'
               ? mutation.error.message
               : 'שגיאה בעיבוד החשבון. נסה לצלם שוב.'}
           </div>
