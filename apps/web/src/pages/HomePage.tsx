@@ -51,7 +51,7 @@ export function HomePage() {
 
         {/* Middle — feature highlights */}
         <div className="w-full max-w-sm flex flex-col gap-3">
-          <FeatureRow icon="📸" text="צלם את החשבון" />
+          <FeatureRow icon="📸" text="צילום של החשבון" />
           <FeatureRow icon="🤖" text="חילוץ פריטים אוטומטי" />
           <FeatureRow icon="✂️" text="פיצול קל בין כולם" />
         </div>
