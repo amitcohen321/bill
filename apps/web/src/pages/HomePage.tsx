@@ -42,9 +42,7 @@ export function HomePage() {
       <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-12">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3" style={{ marginTop: '10px' }}>
-          <div className="w-56 h-56 rounded-3xl bg-black flex items-center justify-center">
-            <img src="/logo.png" alt="Bill" className="w-56 h-56 object-contain" />
-          </div>
+          <img src="/hero.png" alt="Bill" className="w-64 h-64 object-contain drop-shadow-2xl" />
           <h1 className="text-3xl font-bold text-white tracking-tight">ביל</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
@@ -56,6 +54,11 @@ export function HomePage() {
           <FeatureRow icon="📸" text="צילום של החשבון" />
           <FeatureRow icon="🤖" text="חילוץ פריטים אוטומטי" />
           <FeatureRow icon="✂️" text="פיצול קל בין כולם" />
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
+              <span className="text-xs font-semibold text-accent tracking-wide">✦ Powered by AI</span>
+            </div>
+          </div>
         </div>
 
         {/* Bottom — CTAs */}
