@@ -3,10 +3,10 @@ interface SelectionBarProps {
   subtotal: number;
   tipPercent: number;
   currency: string;
-  onApprove: () => void;
+  onApprove?: () => void;
 }
 
-export function SelectionBar({ count, subtotal, tipPercent, currency, onApprove }: SelectionBarProps) {
+export function SelectionBar({ count, subtotal, tipPercent, currency }: SelectionBarProps) {
   const currencySymbol = currency === 'ILS' ? '₪' : currency;
   const visible = count > 0;
   const grandTotal = subtotal * (1 + tipPercent / 100);
@@ -41,12 +41,6 @@ export function SelectionBar({ count, subtotal, tipPercent, currency, onApprove 
           </span>
         </div>
 
-        <button
-          onClick={onApprove}
-          className="shrink-0 bg-gradient-brand text-white font-semibold rounded-2xl px-6 py-3 text-base shadow-glow active:scale-95 transition-transform duration-100"
-        >
-          אשר בחירה
-        </button>
       </div>
     </div>
   );
