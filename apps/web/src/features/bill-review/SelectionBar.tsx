@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 interface SelectionBarProps {
   count: number;
   subtotal: number;
@@ -7,9 +9,11 @@ interface SelectionBarProps {
 }
 
 export function SelectionBar({ count, subtotal, tipPercent, currency }: SelectionBarProps) {
+  const [rounded, setRounded] = useState(false);
   const currencySymbol = currency === 'ILS' ? '₪' : currency;
   const visible = count > 0;
   const grandTotal = subtotal * (1 + tipPercent / 100);
+  const displayTotal = rounded ? Math.round(grandTotal) : grandTotal;
   const hasTip = tipPercent > 0;
 
   return (
@@ -37,10 +41,21 @@ export function SelectionBar({ count, subtotal, tipPercent, currency }: Selectio
           )}
 
           <span className="text-white font-bold text-2xl tabular-nums leading-tight">
-            {currencySymbol}{grandTotal.toFixed(2)}
+            {currencySymbol}{rounded ? displayTotal : grandTotal.toFixed(2)}
           </span>
         </div>
 
+        <button
+          onClick={() => setRounded((r) => !r)}
+          className={[
+            'flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors duration-150',
+            rounded
+              ? 'bg-accent text-black border-accent'
+              : 'bg-transparent text-white/60 border-white/20 hover:border-white/40',
+          ].join(' ')}
+        >
+          עיגול סכום
+        </button>
       </div>
     </div>
   );
