@@ -58,7 +58,7 @@ export function HomePage() {
 
         {/* Bottom — CTAs */}
         <div className="w-full max-w-sm flex flex-col gap-4">
-          <Button size="lg" fullWidth onClick={() => navigate('/create-table')}>
+          <Button size="lg" fullWidth onClick={() => navigate('/create-table')} className="mt-[10px]">
             צור שולחן
           </Button>
 
