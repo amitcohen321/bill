@@ -42,7 +42,9 @@ export function HomePage() {
       <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-12">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3" style={{ marginTop: '10px' }}>
-          <img src="/logo.png" alt="Bill" className="w-56 h-56 object-contain" />
+          <div className="w-56 h-56 rounded-3xl bg-black flex items-center justify-center">
+            <img src="/logo.png" alt="Bill" className="w-56 h-56 object-contain" />
+          </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">ביל</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות

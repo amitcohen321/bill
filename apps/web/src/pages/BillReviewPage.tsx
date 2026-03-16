@@ -32,8 +32,16 @@ export function BillReviewPage() {
 
   function handleToggle(id: string) {
     if (selectedIds.has(id)) {
-      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
-      setPortions((prev) => { const next = new Map(prev); next.delete(id); return next; });
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      setPortions((prev) => {
+        const next = new Map(prev);
+        next.delete(id);
+        return next;
+      });
     } else {
       setSelectedIds((prev) => new Set(prev).add(id));
     }
@@ -51,12 +59,10 @@ export function BillReviewPage() {
     <>
       <PageLayout showBack title="סקירת חשבון">
         {/* Extra bottom padding so content isn't hidden behind the floating bar */}
-        <div className="flex flex-col gap-6 mt-6 pb-32">
+        <div className="mt-6 flex flex-col gap-6 pb-32">
           <div>
             <h2 className="text-2xl font-bold text-white">פריטים בחשבון</h2>
-            <p className="text-white/50 mt-1">
-              זוהו {extraction.items.length} פריטים · לחץ לבחירה
-            </p>
+            <p className="mt-1 text-white/50">זוהו {extraction.items.length} פריטים · לחץ לבחירה</p>
           </div>
 
           <ItemList
@@ -81,7 +87,7 @@ export function BillReviewPage() {
                 fullWidth
                 onClick={() => navigate(`/tables/${tableId}/scan`)}
               >
-                צלם שוב
+                צלם קבלה שוב
               </Button>
             </div>
           )}

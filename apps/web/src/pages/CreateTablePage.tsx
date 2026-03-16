@@ -136,7 +136,7 @@ export function CreateTablePage() {
         )}
 
         <Button type="submit" size="lg" fullWidth loading={isPending} disabled={isPending}>
-          {isPending ? 'מעבד...' : 'צור חשבון'}
+          {isPending ? 'מעבד...' : 'צור שולחן'}
         </Button>
 
         {/* Hidden file inputs */}
