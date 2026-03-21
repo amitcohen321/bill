@@ -56,7 +56,7 @@ export function HomePage() {
           <FeatureRow icon="✂️" text="פיצול קל בין כולם" />
           <div className="flex items-center justify-center gap-2 mt-1">
             <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
-              <span className="text-xs font-semibold text-accent tracking-wide">✦ Powered by AI</span>
+              <span className="text-xs font-semibold text-accent tracking-wide">✨ Powered by AI</span>
             </div>
           </div>
         </div>
