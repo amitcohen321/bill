@@ -55,8 +55,8 @@ interface ItemListProps {
   selectedIds: Set<string>;
   onToggle: (id: string) => void;
   itemParticipants?: Map<string, string[]>; // itemId → animal emojis
-  isDone?: boolean;
-  onSetDone?: () => void;
+  isDone?: boolean | undefined;
+  onSetDone?: (() => void) | undefined;
 }
 
 interface ItemRowProps {
