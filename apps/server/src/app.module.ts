@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { configuration } from './common/config/configuration';
 import { TablesModule } from './modules/tables/tables.module';
 import { BillExtractionModule } from './modules/bill-extraction/bill-extraction.module';
+import { SessionModule } from './modules/session/session.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BillExtractionModule } from './modules/bill-extraction/bill-extraction.
     }),
     TablesModule,
     BillExtractionModule,
+    SessionModule,
   ],
 })
 export class AppModule {}

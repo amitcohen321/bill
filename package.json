@@ -2,7 +2,7 @@
   "name": "bill",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @bill/server dev\" \"pnpm --filter @bill/web dev\"",
+    "dev": "pnpm --filter @bill/shared build && concurrently \"pnpm --filter @bill/shared dev\" \"pnpm --filter @bill/server dev\" \"pnpm --filter @bill/web dev\"",
     "build": "pnpm --filter @bill/shared build && pnpm --filter @bill/server build && pnpm --filter @bill/web build",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\""

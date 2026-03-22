@@ -20,8 +20,8 @@ export function BillCapture({ tableId }: BillCaptureProps) {
 
   const mutation = useMutation({
     mutationFn: ({ file }: { file: File }) => uploadBillImage(tableId, file),
-    onSuccess: (extraction) => {
-      navigate(`/tables/${tableId}/review`, { state: { extraction } });
+    onSuccess: () => {
+      navigate(`/tables/${tableId}`);
     },
   });
 

@@ -22,10 +22,10 @@ export function CreateTablePage() {
       const table = await createTable();
       markAsManager(table.tableId);
       const extraction = await uploadBillImage(table.tableId, file);
-      return { table, extraction };
+      return { table };
     },
-    onSuccess: ({ table, extraction }) => {
-      navigate(`/tables/${table.tableId}/review`, { state: { extraction } });
+    onSuccess: ({ table }) => {
+      navigate(`/tables/${table.tableId}`);
     },
   });
 

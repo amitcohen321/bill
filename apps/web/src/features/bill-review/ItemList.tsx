@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import type { BillItem, ItemCategory } from '@bill/shared';
 import { ITEM_CATEGORIES } from '@bill/shared';
 import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 
 const CATEGORY_LABELS: Record<ItemCategory, string> = {
   starter: 'מנות פתיחה',
@@ -20,14 +20,14 @@ const CATEGORY_EMOJI: Record<ItemCategory, string> = {
 };
 
 const DUPE_COLORS = [
-  '#60a5fa', // blue
-  '#34d399', // emerald
-  '#fb923c', // orange
-  '#f472b6', // pink
-  '#facc15', // yellow
-  '#2dd4bf', // teal
-  '#f87171', // red
-  '#c084fc', // violet
+  '#60a5fa',
+  '#34d399',
+  '#fb923c',
+  '#f472b6',
+  '#facc15',
+  '#2dd4bf',
+  '#f87171',
+  '#c084fc',
 ];
 
 function buildDupeColorMap(items: BillItem[]): Map<string, string> {
@@ -54,53 +54,23 @@ interface ItemListProps {
   warnings: string[];
   selectedIds: Set<string>;
   onToggle: (id: string) => void;
-  portions?: Map<string, number>;
-  onPortionChange?: (id: string, portion: number) => void;
+  itemParticipants?: Map<string, string[]>; // itemId → animal emojis
+  isDone?: boolean;
+  onSetDone?: () => void;
 }
-
-type PortionKey = 'full' | 'half' | 'third' | 'custom';
 
 interface ItemRowProps {
   item: BillItem;
   selected: boolean;
   dupeColor: string | undefined;
   currencySymbol: string;
-  portion: number;
+  participants: string[];
   onToggle: () => void;
-  onPortionChange: (portion: number) => void;
 }
 
-function ItemRow({ item, selected, dupeColor, currencySymbol, portion, onToggle, onPortionChange }: ItemRowProps) {
-  const [customActive, setCustomActive] = useState(false);
-  const [customDen, setCustomDen] = useState(2);
-
-  const portionKey: PortionKey = customActive
-    ? 'custom'
-    : portion >= 0.999
-    ? 'full'
-    : Math.abs(portion - 0.5) < 0.001
-    ? 'half'
-    : Math.abs(portion - 1 / 3) < 0.001
-    ? 'third'
-    : 'custom';
-
-  const effectivePrice = item.price * Math.min(portion, 1);
-
-  function handlePreset(key: PortionKey) {
-    setCustomActive(key === 'custom');
-    if (key === 'full') onPortionChange(1);
-    else if (key === 'half') onPortionChange(0.5);
-    else if (key === 'third') onPortionChange(1 / 3);
-    else onPortionChange(Math.min(1 / Math.max(customDen, 1), 1));
-  }
-
-  function handleCustomDenChange(den: number) {
-    const d = Math.max(1, den);
-    setCustomDen(d);
-    onPortionChange(1 / d);
-  }
-
+function ItemRow({ item, selected, dupeColor, currencySymbol, participants, onToggle }: ItemRowProps) {
   const borderStyle = dupeColor ? { borderColor: dupeColor, borderWidth: '3px' } : undefined;
+  const otherParticipants = participants.filter((a, i) => i < participants.length); // all for display
 
   return (
     <div
@@ -129,68 +99,39 @@ function ItemRow({ item, selected, dupeColor, currencySymbol, portion, onToggle,
               </svg>
             )}
           </div>
-          <span className={['font-medium leading-snug truncate', selected ? 'text-white' : 'text-white/80'].join(' ')}>
-            {item.name}
-          </span>
-        </div>
-
-        <div className="flex flex-col items-end shrink-0">
-          {selected && portion < 0.999 && (
-            <span className="text-white/30 text-xs tabular-nums line-through leading-none mb-0.5">
-              {currencySymbol}{item.price.toFixed(2)}
+          <div className="flex flex-col items-start min-w-0">
+            <span className={['text-lg font-medium leading-snug truncate w-full', selected ? 'text-white' : 'text-white/80'].join(' ')}>
+              {item.name}
             </span>
-          )}
-          <span className={['font-semibold text-lg tabular-nums', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
-            {currencySymbol}{effectivePrice.toFixed(2)}
-          </span>
-        </div>
-      </button>
-
-      {selected && (
-        <div className="px-3 pb-3 pt-0 border-t border-white/10 bg-black/10">
-          <div className="flex gap-1.5 pt-2">
-            {(['full', 'half', 'third', 'custom'] as const).map((key) => {
-              const labels: Record<PortionKey, string> = { full: 'סכום מלא', half: '½', third: '⅓', custom: 'מותאם' };
-              const labelClass: Record<PortionKey, string> = { full: 'text-xs', half: 'text-base', third: 'text-base', custom: 'text-xs' };
-              return (
-                <button
-                  key={key}
-                  onClick={() => handlePreset(key)}
-                  className={[
-                    'flex-1 py-1.5 rounded-xl font-semibold transition-colors',
-                    labelClass[key],
-                    portionKey === key
-                      ? 'bg-accent text-white'
-                      : 'bg-surface-elevated text-white/50 hover:text-white/70',
-                  ].join(' ')}
-                >
-                  {labels[key]}
-                </button>
-              );
-            })}
+            {otherParticipants.length > 0 && (
+              <span className="text-sm leading-none text-white/50 mt-0.5">
+                {otherParticipants.join('')} ×{otherParticipants.length}
+              </span>
+            )}
+            {otherParticipants.length === 0 && (
+              <span className="text-white/25 text-sm mt-0.5">אף אחד</span>
+            )}
           </div>
-
-          {portionKey === 'custom' && (
-            <div className="flex items-center justify-center gap-2 mt-2" dir="ltr">
-              <span className="text-white/60 text-sm font-medium">1</span>
-              <span className="text-white/40 text-sm">/</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={customDen}
-                onChange={(e) => handleCustomDenChange(parseInt(e.target.value) || 1)}
-                className="w-14 text-center bg-surface-elevated border border-surface-border rounded-xl py-1 text-white text-sm outline-none focus:border-accent/50"
-              />
-            </div>
-          )}
         </div>
-      )}
+
+        <span className={['font-semibold text-xl tabular-nums shrink-0', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
+          {currencySymbol}{item.price.toFixed(2)}
+        </span>
+      </button>
     </div>
   );
 }
 
-export function ItemList({ items, currency, warnings, selectedIds, onToggle, portions, onPortionChange }: ItemListProps) {
+export function ItemList({
+  items,
+  currency,
+  warnings,
+  selectedIds,
+  onToggle,
+  itemParticipants,
+  isDone,
+  onSetDone,
+}: ItemListProps) {
   const total = items.reduce((sum, item) => sum + item.price, 0);
   const currencySymbol = currency === 'ILS' ? '₪' : currency;
   const dupeColors = buildDupeColorMap(items);
@@ -226,7 +167,7 @@ export function ItemList({ items, currency, warnings, selectedIds, onToggle, por
         <div key={group.category} className="flex flex-col gap-2">
           <div className="flex items-center gap-2 px-1">
             <span className="text-lg">{CATEGORY_EMOJI[group.category]}</span>
-            <span className="text-white/60 text-sm font-semibold uppercase tracking-wider">
+            <span className="text-white/60 text-base font-semibold uppercase tracking-wider">
               {CATEGORY_LABELS[group.category]}
             </span>
           </div>
@@ -237,15 +178,25 @@ export function ItemList({ items, currency, warnings, selectedIds, onToggle, por
               selected={selectedIds.has(item.id)}
               dupeColor={dupeColors.get(item.id)}
               currencySymbol={currencySymbol}
-              portion={portions?.get(item.id) ?? 1}
+              participants={itemParticipants?.get(item.id) ?? []}
               onToggle={() => onToggle(item.id)}
-              onPortionChange={(p) => onPortionChange?.(item.id, p)}
             />
           ))}
         </div>
       ))}
 
       <div className="h-px bg-surface-border" />
+
+      {onSetDone && (
+        <Button
+          size="sm"
+          fullWidth
+          variant={isDone ? 'secondary' : 'primary'}
+          onClick={onSetDone}
+        >
+          {isDone ? '↩ בטל סיום' : '✓ סיימתי לבחור'}
+        </Button>
+      )}
 
       <Card glow className="flex items-center justify-between px-4 py-4">
         <span className="text-white/70 font-medium">סה״כ</span>

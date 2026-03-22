@@ -9,3 +9,9 @@ export const ALLOWED_IMAGE_TYPES = [
 export const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 export const DEFAULT_CURRENCY = 'ILS';
+
+export const ANIMAL_EMOJIS = [
+  '🐶', '🐱', '🐹', '🦊', '🐻', '🐼',
+  '🐨', '🐯', '🐮', '🐸', '🐵', '🐔',
+  '🐧', '🐦', '🦆', '🦉', '🦇', '🐺', '🐗',
+] as const;
