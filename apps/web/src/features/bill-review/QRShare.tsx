@@ -36,7 +36,7 @@ export function QRShare({ tableId }: QRShareProps) {
       <div className="rounded-2xl bg-white p-3">
         <QRCodeSVG
           value={url}
-          size={180}
+          size={126}
           bgColor="#ffffff"
           fgColor="#0a0a14"
           level="M"

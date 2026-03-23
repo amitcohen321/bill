@@ -18,13 +18,14 @@ export function ParticipantBar({ diners, myDinerId }: ParticipantBarProps) {
             <div
               key={diner.dinerId}
               className={[
-                'flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm',
+                'flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-base',
                 isMe
                   ? 'bg-accent/20 border border-accent/40'
                   : 'bg-surface-elevated border border-surface-border',
               ].join(' ')}
             >
-              <span className="text-base leading-none">{diner.animal}</span>
+              <span className="text-2xl leading-none">{diner.animal}</span>
+              {diner.name && <span className="text-white text-sm font-medium">{diner.name}</span>}
               {isMe && (
                 <span className="text-accent text-xs font-medium">אתה</span>
               )}

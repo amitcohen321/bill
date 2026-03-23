@@ -10,7 +10,7 @@ import type { Server, Socket } from 'socket.io';
 import { SessionService } from './session.service';
 import { TablesService } from '../tables/tables.service';
 
-function isJoinPayload(data: unknown): data is { tableId: string; isAdmin: boolean } {
+function isJoinPayload(data: unknown): data is { tableId: string; isAdmin: boolean; name?: string } {
   return (
     typeof data === 'object' &&
     data !== null &&
@@ -47,7 +47,7 @@ export class SessionGateway implements OnGatewayDisconnect {
       return;
     }
 
-    const { tableId, isAdmin } = payload;
+    const { tableId, isAdmin, name } = payload;
 
     try {
       this.tablesService.getTable(tableId);
@@ -56,7 +56,7 @@ export class SessionGateway implements OnGatewayDisconnect {
       return;
     }
 
-    const { dinerId, session } = this.sessionService.joinTable(tableId, client.id, isAdmin);
+    const { dinerId, session } = this.sessionService.joinTable(tableId, client.id, isAdmin, name);
     void client.join(tableId);
     client.emit('joined', { dinerId });
 

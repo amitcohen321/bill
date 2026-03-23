@@ -40,11 +40,11 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
 
   // Map items to diners who selected them
   const itemToDinersMap = useMemo(() => {
-    const map = new Map<string, Array<{ animal: string; dinerId: string }>>();
+    const map = new Map<string, Array<{ animal: string; name?: string; dinerId: string }>>();
     for (const diner of results.dinerResults) {
       for (const itemId of diner.selectedItemIds) {
         const list = map.get(itemId) ?? [];
-        list.push({ animal: diner.animal, dinerId: diner.dinerId });
+        list.push({ animal: diner.animal, name: diner.name, dinerId: diner.dinerId });
         map.set(itemId, list);
       }
     }
@@ -73,7 +73,7 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
 
       {myResult && (
         <div className="rounded-3xl bg-accent/10 border border-accent/30 p-5 text-center">
-          <p className="text-white/60 text-sm font-medium mb-1">הסכום שלך {myResult.animal}</p>
+          <p className="text-white/60 text-sm font-medium mb-1">הסכום שלך {myResult.animal} {myResult.name && `(${myResult.name})`}</p>
           <p className="text-4xl font-bold text-accent tabular-nums">
             {currencySymbol}{totalWithTip.toFixed(2)}
           </p>
@@ -127,7 +127,7 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
                     </div>
                     <div className="text-xs text-white/40 text-right">
                       {otherDiners.length > 0 ? (
-                        <>גם {otherDiners.map((d) => d.animal).join(', ')}</>
+                        <>גם {otherDiners.map((d) => `${d.animal}${d.name ? ` (${d.name})` : ''}`).join(', ')}</>
                       ) : (
                         <>רק אתה</>
                       )}
@@ -164,6 +164,7 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{result.animal}</span>
+                    {result.name && <span className="text-white text-sm font-medium">{result.name}</span>}
                     {result.dinerId === myDinerId && (
                       <span className="text-accent text-xs font-medium">אתה</span>
                     )}

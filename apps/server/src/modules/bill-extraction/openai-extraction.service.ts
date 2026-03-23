@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import * as sharp from 'sharp';
 import { OpenAIExtractionResult, OpenAIExtractionResultSchema } from '@bill/shared';
 
 @Injectable()
@@ -17,8 +18,14 @@ export class OpenAIExtractionService {
   }
 
   async extractBillItems(imageBuffer: Buffer, mimeType: string): Promise<OpenAIExtractionResult> {
-    const base64Image = imageBuffer.toString('base64');
-    const dataUrl = `data:${mimeType};base64,${base64Image}`;
+    // Compress and optimize image: resize to max 1024x1024 and reduce quality for faster processing
+    const optimizedBuffer = await sharp(imageBuffer)
+      .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+
+    const base64Image = optimizedBuffer.toString('base64');
+    const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
     const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract ONLY the dish/food line items that are EXPLICITLY VISIBLE in the image.
 
@@ -97,7 +104,7 @@ Response format:
           content: [
             {
               type: 'image_url',
-              image_url: { url: dataUrl, detail: 'high' },
+              image_url: { url: dataUrl, detail: 'auto' },
             },
             {
               type: 'text',

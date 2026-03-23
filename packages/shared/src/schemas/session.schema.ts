@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const DinerSchema = z.object({
   dinerId: z.string().uuid(),
   animal: z.string(),
+  name: z.string().optional(),
   isAdmin: z.boolean(),
   selectedItemIds: z.array(z.string()),
   isDone: z.boolean(),
@@ -13,6 +14,7 @@ export type Diner = z.infer<typeof DinerSchema>;
 export const DinerResultSchema = z.object({
   dinerId: z.string().uuid(),
   animal: z.string(),
+  name: z.string().optional(),
   selectedItemIds: z.array(z.string()),
   total: z.number(),
 });
@@ -38,6 +40,7 @@ export type SessionState = z.infer<typeof SessionStateSchema>;
 export const JoinTablePayloadSchema = z.object({
   tableId: z.string(),
   isAdmin: z.boolean(),
+  name: z.string().optional(),
 });
 
 export type JoinTablePayload = z.infer<typeof JoinTablePayloadSchema>;

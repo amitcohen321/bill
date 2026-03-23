@@ -4,7 +4,7 @@ import type { SessionState } from '@bill/shared';
 
 const SERVER_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
-export function useTableSession(tableId: string, isAdmin: boolean) {
+export function useTableSession(tableId: string, isAdmin: boolean, name?: string, shouldConnect: boolean = true) {
   const [sessionState, setSessionState] = useState<SessionState | null>(null);
   const [myDinerId, setMyDinerId] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +12,8 @@ export function useTableSession(tableId: string, isAdmin: boolean) {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    if (!shouldConnect) return;
+
     const socket = io(SERVER_URL, {
       autoConnect: false,
       transports: ['websocket'],
@@ -21,7 +23,7 @@ export function useTableSession(tableId: string, isAdmin: boolean) {
     socket.on('connect', () => {
       setIsConnected(true);
       setConnectionError(null);
-      socket.emit('join-table', { tableId, isAdmin });
+      socket.emit('join-table', { tableId, isAdmin, name });
     });
 
     socket.on('disconnect', () => {
@@ -50,7 +52,7 @@ export function useTableSession(tableId: string, isAdmin: boolean) {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [tableId, isAdmin]);
+  }, [tableId, isAdmin, name, shouldConnect]);
 
   const toggleItem = useCallback((itemId: string) => {
     socketRef.current?.emit('toggle-item', { itemId });

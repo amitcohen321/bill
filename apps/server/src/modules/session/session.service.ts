@@ -6,6 +6,7 @@ import { TablesService } from '../tables/tables.service';
 interface DinerRecord {
   dinerId: string;
   animal: string;
+  name?: string;
   isAdmin: boolean;
   selectedItemIds: string[];
   isDone: boolean;
@@ -49,6 +50,7 @@ export class SessionService {
     tableId: string,
     socketId: string,
     isAdmin: boolean,
+    name?: string,
   ): { dinerId: string; session: SessionRecord } {
     const session = this.getOrCreateSession(tableId);
     const animal = this.assignAnimal(session);
@@ -56,6 +58,7 @@ export class SessionService {
     const diner: DinerRecord = {
       dinerId,
       animal,
+      name: name ?? undefined,
       isAdmin,
       selectedItemIds: [],
       isDone: false,
@@ -159,6 +162,7 @@ export class SessionService {
           return {
             dinerId: d.dinerId,
             animal: d.animal,
+            name: d.name,
             selectedItemIds: [...d.selectedItemIds],
             total: Math.round(total * 100) / 100,
           };
@@ -182,6 +186,7 @@ export class SessionService {
       diners: [...session.diners.values()].map((d) => ({
         dinerId: d.dinerId,
         animal: d.animal,
+        name: d.name,
         isAdmin: d.isAdmin,
         selectedItemIds: [...d.selectedItemIds],
         isDone: d.isDone,
