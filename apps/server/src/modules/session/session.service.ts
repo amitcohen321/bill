@@ -58,7 +58,7 @@ export class SessionService {
     const diner: DinerRecord = {
       dinerId,
       animal,
-      name: name ?? undefined,
+      ...(name ? { name } : {}),
       isAdmin,
       selectedItemIds: [],
       isDone: false,

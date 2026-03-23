@@ -44,7 +44,7 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
     for (const diner of results.dinerResults) {
       for (const itemId of diner.selectedItemIds) {
         const list = map.get(itemId) ?? [];
-        list.push({ animal: diner.animal, name: diner.name, dinerId: diner.dinerId });
+        list.push({ animal: diner.animal, ...(diner.name ? { name: diner.name } : {}), dinerId: diner.dinerId });
         map.set(itemId, list);
       }
     }
