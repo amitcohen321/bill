@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageLayout } from '../components/ui/PageLayout';
 import { ItemList } from '../features/bill-review/ItemList';
 import { QRShare } from '../features/bill-review/QRShare';
-import { ParticipantBar } from '../features/session/ParticipantBar';
 import { ResultsView } from '../features/session/ResultsView';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -18,6 +17,19 @@ export function GuestTablePage() {
   const admin = isManager(tableId ?? '');
   const [nameInput, setNameInput] = useState('');
   const [nameSubmitted, setNameSubmitted] = useState(false);
+  const [submittedName, setSubmittedName] = useState<string | undefined>(undefined);
+  const nameRef = useRef('');
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    nameRef.current = e.target.value;
+    setNameInput(e.target.value);
+  };
+
+  const handleNameSubmit = () => {
+    const name = nameRef.current.trim() || undefined;
+    setSubmittedName(name);
+    setNameSubmitted(true);
+  };
 
   const { data: table, isLoading, isError } = useQuery({
     queryKey: ['table', tableId],
@@ -27,7 +39,7 @@ export function GuestTablePage() {
   });
 
   const { sessionState, myDinerId, isConnected, connectionError, toggleItem, setDone, calculate } =
-    useTableSession(tableId ?? '', admin, nameSubmitted ? nameInput || undefined : undefined, nameSubmitted);
+    useTableSession(tableId ?? '', admin, submittedName, nameSubmitted);
 
   const extraction = table?.extraction;
 
@@ -37,7 +49,7 @@ export function GuestTablePage() {
     for (const diner of sessionState.diners) {
       for (const itemId of diner.selectedItemIds) {
         const list = map.get(itemId) ?? [];
-        list.push(diner.animal);
+        list.push(diner.name ? `${diner.animal} ${diner.name}` : diner.animal);
         map.set(itemId, list);
       }
     }
@@ -61,7 +73,7 @@ export function GuestTablePage() {
   // Show name input dialog if not submitted yet
   if (!nameSubmitted) {
     return (
-      <PageLayout title="שולחן">
+      <PageLayout>
         <div className="flex flex-col gap-6 mt-6 pb-32">
           {/* Back to home button */}
           <button
@@ -80,10 +92,10 @@ export function GuestTablePage() {
             <Input
               placeholder="שמך (אופציונלי)"
               value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
+              onChange={handleNameChange}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  setNameSubmitted(true);
+                  handleNameSubmit();
                 }
               }}
             />
@@ -91,9 +103,9 @@ export function GuestTablePage() {
             <Button
               size="lg"
               fullWidth
-              onClick={() => setNameSubmitted(true)}
+              onClick={handleNameSubmit}
             >
-              הכנס
+              אישור
             </Button>
           </div>
         </div>
@@ -102,7 +114,7 @@ export function GuestTablePage() {
   }
 
   return (
-    <PageLayout title="שולחן">
+    <PageLayout>
       <div className="flex flex-col gap-6 mt-6 pb-32">
 
         {/* Back to home button */}
@@ -145,35 +157,20 @@ export function GuestTablePage() {
           <div className="flex items-center gap-2">
             <span className="text-3xl">{myDiner.animal}</span>
             <div>
-              {myDiner.name && <p className="text-white font-medium">{myDiner.name}</p>}
+              {(myDiner.name || submittedName) && (
+                <p className="text-white font-medium">{myDiner.name || submittedName}</p>
+              )}
               <p className="text-white/40 text-xs">אתה</p>
               {myDiner.isAdmin && <p className="text-accent text-xs font-medium">מנהל שולחן</p>}
             </div>
           </div>
         )}
 
-        {/* Participants */}
-        {sessionState && sessionState.diners.length > 0 && (
-          <ParticipantBar diners={sessionState.diners} myDinerId={myDinerId} />
-        )}
-
         {/* Admin: share QR */}
         {admin && extraction && !hasResults && <QRShare tableId={tableId} />}
 
-        {/* Admin: retake photo */}
-        {admin && extraction && !hasResults && (
-          <Button
-            variant="secondary"
-            size="md"
-            fullWidth
-            onClick={() => navigate(`/tables/${tableId}/scan`)}
-          >
-            צלם קבלה שוב
-          </Button>
-        )}
-
-        {/* Admin: participants status */}
-        {admin && sessionState && sessionState.diners.length > 0 && !hasResults && (
+        {/* Participants status */}
+        {sessionState && sessionState.diners.length > 0 && !hasResults && (
           <div className="rounded-2xl bg-surface-card border border-surface-border p-4">
             <p className="text-white/40 text-xs font-semibold uppercase tracking-wider mb-3">סטטוס סועדים</p>
             <div className="flex flex-col gap-2">
@@ -182,12 +179,16 @@ export function GuestTablePage() {
                   key={diner.dinerId}
                   className="flex items-center justify-between py-2 px-3 rounded-2xl bg-surface-elevated"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{diner.animal}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{diner.animal}</span>
                     <div className="flex flex-col">
-                      {diner.name && <span className="text-white text-sm font-medium">{diner.name}</span>}
+                      {diner.name && (
+                        <span className="text-white text-base font-semibold leading-tight">
+                          {diner.name}
+                        </span>
+                      )}
                       <span className="text-white/60 text-sm">
-                        {diner.isDone ? '✓ סיים לבחור' : '⏳ עדיין בוחר'}
+                        {diner.isDone ? '✓ סיים לבחור' : 'עדיין בוחר'}
                       </span>
                     </div>
                   </div>
@@ -224,8 +225,18 @@ export function GuestTablePage() {
         {/* Item selection */}
         {extraction && !hasResults && (
           <>
-            <div>
+            <div className="flex flex-col gap-3">
               <h2 className="text-2xl font-bold text-white">בחר את הפריטים שלך</h2>
+              {admin && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  fullWidth
+                  onClick={() => navigate(`/tables/${tableId}/scan`)}
+                >
+                  צלם קבלה שוב
+                </Button>
+              )}
             </div>
 
             <ItemList

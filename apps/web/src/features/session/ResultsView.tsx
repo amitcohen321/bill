@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { CalculationResult, BillItem } from '@bill/shared';
 
 interface ResultsViewProps {
@@ -11,6 +12,7 @@ interface ResultsViewProps {
 const TIP_OPTIONS = [0, 5, 10, 12] as const;
 
 export function ResultsView({ results, myDinerId, items, admin = false }: ResultsViewProps) {
+  const navigate = useNavigate();
   const [tipPct, setTipPct] = useState<number>(0);
   const [showAdminDetails, setShowAdminDetails] = useState<boolean>(false);
   const currencySymbol = results.currency === 'ILS' ? '₪' : results.currency;
@@ -58,6 +60,12 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
         <h2 className="text-2xl font-bold text-white">החישוב הסתיים</h2>
         <p className="text-white/50 text-sm mt-1">הסכומים הסופיים לתשלום</p>
       </div>
+      <button
+        onClick={() => navigate('/')}
+        className="text-accent hover:text-accent/80 transition-colors text-base font-medium inline-flex items-center gap-1 w-fit"
+      >
+        ← חזור לעמוד הבית
+      </button>
 
       {/* Warning if not fully paid */}
       {!isFullyPaid && (
@@ -73,8 +81,8 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
 
       {myResult && (
         <div className="rounded-3xl bg-accent/10 border border-accent/30 p-5 text-center">
-          <p className="text-white/60 text-sm font-medium mb-1">הסכום שלך {myResult.animal} {myResult.name && `(${myResult.name})`}</p>
-          <p className="text-4xl font-bold text-accent tabular-nums">
+          <p className="text-white/60 text-lg font-medium mb-1">הסכום שלך {myResult.animal}{myResult.name ? ` (${myResult.name})` : ''}</p>
+          <p className="text-5xl font-bold text-accent tabular-nums">
             {currencySymbol}{totalWithTip.toFixed(2)}
           </p>
 
@@ -140,8 +148,7 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
         </div>
       )}
 
-      {admin && (
-        <div className="rounded-2xl bg-surface-card border border-surface-border p-4">
+      <div className="rounded-2xl bg-surface-card border border-surface-border p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">כולם</p>
             {admin && (
@@ -199,7 +206,6 @@ export function ResultsView({ results, myDinerId, items, admin = false }: Result
             ))}
           </div>
         </div>
-      )}
     </div>
   );
 }

@@ -64,6 +64,23 @@ export class SessionGateway implements OnGatewayDisconnect {
     this.server.to(tableId).emit('session-state', state);
   }
 
+  @SubscribeMessage('set-name')
+  handleSetName(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: unknown,
+  ) {
+    const name =
+      typeof payload === 'object' && payload !== null
+        ? (payload as Record<string, unknown>)['name']
+        : undefined;
+    if (typeof name !== 'string' || !name.trim()) return;
+
+    const { tableId, session } = this.sessionService.setName(client.id, name.trim());
+    if (tableId && session) {
+      this.server.to(tableId).emit('session-state', this.sessionService.toSessionState(session));
+    }
+  }
+
   @SubscribeMessage('toggle-item')
   handleToggleItem(
     @ConnectedSocket() client: Socket,

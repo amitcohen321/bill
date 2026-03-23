@@ -69,6 +69,20 @@ export class SessionService {
     return { dinerId, session };
   }
 
+  setName(socketId: string, name: string): { tableId: string | null; session: SessionRecord | null } {
+    for (const [tableId, session] of this.sessions) {
+      const dinerId = session.socketToDiner.get(socketId);
+      if (dinerId !== undefined) {
+        const diner = session.diners.get(dinerId);
+        if (diner) {
+          diner.name = name;
+        }
+        return { tableId, session };
+      }
+    }
+    return { tableId: null, session: null };
+  }
+
   leaveTable(socketId: string): { tableId: string | null; session: SessionRecord | null } {
     for (const [tableId, session] of this.sessions) {
       const dinerId = session.socketToDiner.get(socketId);

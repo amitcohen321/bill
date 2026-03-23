@@ -79,7 +79,7 @@ export function HomePage() {
               'flex items-center rounded-2xl border bg-surface-elevated px-4 gap-3 transition-colors',
               joinError ? 'border-red-500/50' : 'border-surface-border focus-within:border-accent/40',
             ].join(' ')}>
-              <span className="text-white/30 text-sm shrink-0">קוד שולחן</span>
+              <span className="text-white/30 text-sm shrink-0">קוד הצטרפות לשולחן</span>
               <input
                 type="text"
                 inputMode="numeric"

@@ -68,21 +68,15 @@ interface ItemRowProps {
   onToggle: () => void;
 }
 
-function ItemRow({ item, selected, dupeColor, currencySymbol, participants, onToggle }: ItemRowProps) {
-  const borderStyle = dupeColor ? { borderColor: dupeColor, borderWidth: '3px' } : undefined;
-  const otherParticipants = participants.filter((a, i) => i < participants.length); // all for display
+function ItemRow({ item, selected, dupeColor: _dupeColor, currencySymbol, participants, onToggle }: ItemRowProps) {
+  const otherParticipants = participants;
 
   return (
     <div
       className={[
         'rounded-3xl border overflow-hidden transition-all duration-150',
-        selected ? 'shadow-glow-sm' : 'shadow-card',
-        !dupeColor && selected ? 'bg-accent/15 border-accent/30' : '',
-        !dupeColor && !selected ? 'bg-surface-card border-surface-border' : '',
-        dupeColor && selected ? 'bg-accent/15' : '',
-        dupeColor && !selected ? 'bg-surface-card' : '',
+        selected ? 'shadow-glow-sm bg-accent/15 border-accent/30' : 'shadow-card bg-surface-card border-surface-border',
       ].join(' ')}
-      style={borderStyle}
     >
       <button
         onClick={onToggle}
@@ -105,7 +99,7 @@ function ItemRow({ item, selected, dupeColor, currencySymbol, participants, onTo
             </span>
             {otherParticipants.length > 0 && (
               <span className="text-sm leading-none text-white/50 mt-0.5">
-                {otherParticipants.join('')} ×{otherParticipants.length}
+                {otherParticipants.join(', ')}
               </span>
             )}
             {otherParticipants.length === 0 && (

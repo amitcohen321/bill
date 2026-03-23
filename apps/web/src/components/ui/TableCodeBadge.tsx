@@ -17,7 +17,7 @@ export function TableCodeBadge({ code }: TableCodeBadgeProps) {
   return (
     <div className="flex items-center justify-between rounded-2xl bg-surface-elevated border border-surface-border px-4 py-3">
       <div className="flex flex-col gap-0.5">
-        <span className="text-white/40 text-xs font-medium">קוד שולחן</span>
+        <span className="text-white/40 text-xs font-medium">קוד הצטרפות לשולחן</span>
         <span className="text-white font-bold text-2xl tabular-nums tracking-[0.25em]">
           {code}
         </span>

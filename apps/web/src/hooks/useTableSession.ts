@@ -23,7 +23,7 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     socket.on('connect', () => {
       setIsConnected(true);
       setConnectionError(null);
-      socket.emit('join-table', { tableId, isAdmin, name });
+      socket.emit('join-table', { tableId, isAdmin });
     });
 
     socket.on('disconnect', () => {
@@ -52,7 +52,14 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [tableId, isAdmin, name, shouldConnect]);
+  }, [tableId, isAdmin, shouldConnect]);
+
+  // Send name as a separate event after joining — avoids all closure timing issues
+  useEffect(() => {
+    if (name && myDinerId && socketRef.current) {
+      socketRef.current.emit('set-name', { name });
+    }
+  }, [name, myDinerId]);
 
   const toggleItem = useCallback((itemId: string) => {
     socketRef.current?.emit('toggle-item', { itemId });
