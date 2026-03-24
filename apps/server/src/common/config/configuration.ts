@@ -7,7 +7,7 @@ const EnvSchema = z.object({
     .default('3001')
     .transform((v) => parseInt(v, 10)),
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
-  GEMINI_MODEL: z.string().optional().default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().optional().default('gemini-3-flash-preview'),
   NODE_ENV: z.enum(['development', 'production', 'test']).optional().default('development'),
 });
 

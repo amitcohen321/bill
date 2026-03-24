@@ -10,12 +10,11 @@ import type { Server, Socket } from 'socket.io';
 import { SessionService } from './session.service';
 import { TablesService } from '../tables/tables.service';
 
-function isJoinPayload(data: unknown): data is { tableId: string; isAdmin: boolean; name?: string } {
+function isJoinPayload(data: unknown): data is { tableId: string; adminToken?: string; name?: string } {
   return (
     typeof data === 'object' &&
     data !== null &&
-    typeof (data as Record<string, unknown>)['tableId'] === 'string' &&
-    typeof (data as Record<string, unknown>)['isAdmin'] === 'boolean'
+    typeof (data as Record<string, unknown>)['tableId'] === 'string'
   );
 }
 
@@ -47,7 +46,7 @@ export class SessionGateway implements OnGatewayDisconnect {
       return;
     }
 
-    const { tableId, isAdmin, name } = payload;
+    const { tableId, adminToken, name } = payload;
 
     try {
       this.tablesService.getTable(tableId);
@@ -56,6 +55,7 @@ export class SessionGateway implements OnGatewayDisconnect {
       return;
     }
 
+    const isAdmin = !!adminToken && this.tablesService.validateAdminToken(tableId, adminToken);
     const { dinerId, session } = this.sessionService.joinTable(tableId, client.id, isAdmin, name);
     void client.join(tableId);
     client.emit('joined', { dinerId });
@@ -121,10 +121,8 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     const { itemId, amount } = payload as { itemId: string; amount: number };
-    console.log('[reduce-item] received', { socketId: client.id, itemId, amount });
     const { tableId, session, error } = this.sessionService.reduceItem(client.id, itemId, amount);
 
-    console.log('[reduce-item] result', { tableId, error, hasSession: !!session });
     if (error) {
       client.emit('error', { code: 'REDUCE_ERROR', message: error });
       return;
@@ -132,7 +130,6 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     if (tableId && session) {
       const state = this.sessionService.toSessionState(session);
-      console.log('[reduce-item] broadcasting state, itemReductions:', state.itemReductions);
       this.server.to(tableId).emit('session-state', state);
     }
   }

@@ -6,7 +6,7 @@ import { PageLayout } from '../components/ui/PageLayout';
 import { Button } from '../components/ui/Button';
 import { ApiError } from '../lib/api/client';
 import { createTable, uploadBillImage } from '../lib/api/tables';
-import { markAsManager } from '../lib/manager';
+import { setAdminToken } from '../lib/manager';
 
 export function CreateTablePage() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export function CreateTablePage() {
   const mutation = useMutation({
     mutationFn: async (file: File) => {
       const table = await createTable();
-      markAsManager(table.tableId);
+      setAdminToken(table.tableId, table.adminToken);
       const extraction = await uploadBillImage(table.tableId, file);
       return { table };
     },

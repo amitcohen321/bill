@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '../components/ui/Button';
@@ -9,6 +9,11 @@ export function HomePage() {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [lastTableId, setLastTableId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastTableId(sessionStorage.getItem('bill_last_table'));
+  }, []);
 
   const joinMutation = useMutation({
     mutationFn: getTableByCode,
@@ -39,22 +44,36 @@ export function HomePage() {
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-secondary/8 rounded-full blur-3xl" />
       </div>
 
+      {/* Top-right — back to table */}
+      {lastTableId && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => navigate(`/tables/${lastTableId}`)}
+            className="flex items-center gap-1.5 rounded-2xl border border-surface-border bg-surface-elevated/80 backdrop-blur px-3 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
+          >
+           → חזרה לשולחן 
+          </button>
+        </div>
+      )}
+
       <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-12">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3" style={{ marginTop: '10px' }}>
           <img src="/hero.png" alt="Bill" className="w-64 h-64 object-contain drop-shadow-2xl" />
-          <h1 className="text-3xl font-bold text-white tracking-tight">ביל</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
           </p>
         </div>
 
-        {/* Middle — feature highlights */}
+        {/* Middle — feature highlights (horizontal) */}
         <div className="w-full max-w-sm flex flex-col gap-3">
-          <FeatureRow icon="📸" text="צילום של החשבון" />
-          <FeatureRow icon="🤖" text="חילוץ פריטים אוטומטי" />
-          <FeatureRow icon="✂️" text="פיצול קל בין כולם" />
-          <div className="flex items-center justify-center gap-2 mt-1">
+          <div className="flex gap-2">
+            <FeatureCard icon="📸" text="צילום של החשבון" />
+            <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
+            <FeatureCard icon="✂️" text="פיצול קל בין כולם" />
+          </div>
+          <div className="flex items-center justify-center gap-2">
             <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
               <span className="text-xs font-semibold text-accent tracking-wide">✨ Powered by AI</span>
             </div>
@@ -109,11 +128,11 @@ export function HomePage() {
   );
 }
 
-function FeatureRow({ icon, text }: { icon: string; text: string }) {
+function FeatureCard({ icon, text }: { icon: string; text: string }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-surface-card border border-surface-border px-4 py-3.5">
+    <div className="flex-1 flex flex-col items-center gap-2 rounded-2xl bg-surface-card border border-surface-border px-3 py-3.5 text-center">
       <span className="text-2xl">{icon}</span>
-      <span className="text-white/80 font-medium">{text}</span>
+      <span className="text-white/80 text-xs font-medium leading-snug">{text}</span>
     </div>
   );
 }

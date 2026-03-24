@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageLayout } from '../components/ui/PageLayout';
@@ -8,17 +8,27 @@ import { ResultsView } from '../features/session/ResultsView';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getTable } from '../lib/api/tables';
-import { isManager } from '../lib/manager';
+import { getAdminToken } from '../lib/manager';
 import { useTableSession } from '../hooks/useTableSession';
+
+function getPersistedName(tableId: string): string {
+  return localStorage.getItem(`bill_name_${tableId}`) ?? '';
+}
 
 export function GuestTablePage() {
   const { tableId } = useParams<{ tableId: string }>();
   const navigate = useNavigate();
-  const admin = isManager(tableId ?? '');
-  const [nameInput, setNameInput] = useState('');
-  const [nameSubmitted, setNameSubmitted] = useState(false);
-  const [submittedName, setSubmittedName] = useState<string | undefined>(undefined);
-  const nameRef = useRef('');
+  const adminToken = getAdminToken(tableId ?? '');
+  const admin = !!adminToken;
+
+  const persistedName = tableId ? getPersistedName(tableId) : '';
+  const [nameInput, setNameInput] = useState(persistedName);
+  const [nameSubmitted, setNameSubmitted] = useState(persistedName !== '' || admin);
+  const [submittedName, setSubmittedName] = useState<string | undefined>(
+    persistedName || undefined,
+  );
+  const [showItemSelection, setShowItemSelection] = useState(false);
+  const nameRef = useRef(persistedName);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     nameRef.current = e.target.value;
@@ -27,6 +37,9 @@ export function GuestTablePage() {
 
   const handleNameSubmit = () => {
     const name = nameRef.current.trim() || undefined;
+    if (tableId) {
+      localStorage.setItem(`bill_name_${tableId}`, name ?? '');
+    }
     setSubmittedName(name);
     setNameSubmitted(true);
   };
@@ -42,8 +55,23 @@ export function GuestTablePage() {
     retry: 1,
   });
 
-  const { sessionState, myDinerId, isConnected, connectionError, toggleItem, setDone, reduceItem, calculate } =
-    useTableSession(tableId ?? '', admin, submittedName, nameSubmitted);
+  const {
+    sessionState,
+    myDinerId,
+    isConnected,
+    connectionError,
+    toggleItem,
+    setDone,
+    reduceItem,
+    calculate,
+  } = useTableSession(tableId ?? '', adminToken, submittedName, nameSubmitted);
+
+  // When new results arrive (recalculated), show results view again
+  useEffect(() => {
+    if (sessionState?.results) {
+      setShowItemSelection(false);
+    }
+  }, [sessionState?.results?.calculatedAt]);
 
   const extraction = table?.extraction;
 
@@ -71,7 +99,6 @@ export function GuestTablePage() {
   const hasResults = !!sessionState?.results;
   const allDone =
     (sessionState?.diners.length ?? 0) > 0 && sessionState?.diners.every((d) => d.isDone);
-  const someDone = !allDone && (sessionState?.diners.some((d) => d.isDone) ?? false);
 
   // Show name input dialog if not submitted yet
   if (!nameSubmitted) {
@@ -83,7 +110,7 @@ export function GuestTablePage() {
             onClick={() => navigate('/')}
             className="text-accent hover:text-accent/80 inline-flex w-fit items-center gap-1 text-sm font-medium transition-colors"
           >
-            ← חזור לעמוד הבית
+           → חזור לעמוד הבית 
           </button>
 
           <div className="mx-auto mt-14 flex max-w-md flex-col gap-6">
@@ -92,7 +119,7 @@ export function GuestTablePage() {
             </div>
 
             <Input
-              placeholder="שמך (אופציונלי)"
+              placeholder="(אופציונלי)"
               value={nameInput}
               onChange={handleNameChange}
               onKeyDown={(e) => {
@@ -116,10 +143,13 @@ export function GuestTablePage() {
       <div className="mt-6 flex flex-col gap-6 pb-32">
         {/* Back to home button */}
         <button
-          onClick={() => navigate('/')}
+          onClick={() => {
+            sessionStorage.setItem('bill_last_table', tableId);
+            navigate('/');
+          }}
           className="text-accent hover:text-accent/80 inline-flex w-fit items-center gap-1 text-sm font-medium transition-colors"
         >
-          ← חזור לעמוד הבית
+         → חזור לעמוד הבית 
         </button>
 
         {/* Connection status */}
@@ -178,42 +208,6 @@ export function GuestTablePage() {
           </Button>
         )}
 
-        {/* Participants status */}
-        {sessionState && sessionState.diners.length > 0 && !hasResults && (
-          <div className="bg-surface-card border-surface-border rounded-2xl border p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
-              סטטוס סועדים
-            </p>
-            <div className="flex flex-col gap-2">
-              {sessionState.diners.map((diner) => (
-                <div
-                  key={diner.dinerId}
-                  className="bg-surface-elevated flex items-center justify-between rounded-2xl px-3 py-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{diner.animal}</span>
-                    <div className="flex flex-col">
-                      {diner.name && (
-                        <span className="text-base font-semibold leading-tight text-white">
-                          {diner.name}
-                        </span>
-                      )}
-                      <span className="text-sm text-white/60">
-                        {diner.isDone ? '✓ סיים לבחור' : 'עדיין בוחר'}
-                      </span>
-                    </div>
-                  </div>
-                  {diner.isAdmin && <span className="text-accent text-xs font-medium">מנהל</span>}
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs text-white/40">
-              {sessionState.diners.filter((d) => d.isDone).length} / {sessionState.diners.length}{' '}
-              סיימו
-            </p>
-          </div>
-        )}
-
         {/* Waiting for scan */}
         {table && !extraction && !isLoading && (
           <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
@@ -223,17 +217,25 @@ export function GuestTablePage() {
         )}
 
         {/* Results view */}
-        {hasResults && extraction && (
+        {hasResults && !showItemSelection && extraction && (
           <ResultsView
             results={sessionState!.results!}
             myDinerId={myDinerId}
             items={extraction.items}
             admin={admin}
+            onGoBack={() => setShowItemSelection(true)}
           />
         )}
 
+        {/* Admin: recalculate (shown when results exist but someone changed their items) */}
+        {admin && hasResults && !showItemSelection && sessionState?.resultsStale && (
+          <Button size="lg" fullWidth onClick={calculate}>
+            התבצעו שינויים - חשב מחדש
+          </Button>
+        )}
+
         {/* Item selection */}
-        {extraction && !hasResults && (
+        {extraction && (!hasResults || showItemSelection) && (
           <>
             <h2 className="text-2xl font-bold text-white">בחר את הפריטים שלך</h2>
 
@@ -253,14 +255,48 @@ export function GuestTablePage() {
           </>
         )}
 
-        {/* Admin: calculate */}
-        {admin && extraction && !hasResults && (
+        {/* Admin: calculate (first time) / recalculate (when editing) */}
+        {admin && extraction && (!hasResults || showItemSelection) && (
           <div className="flex flex-col gap-3 pt-2">
-            {someDone && (
-              <p className="text-center text-sm text-yellow-400/70">לא כולם סיימו לבחור</p>
+            {/* Participants status */}
+            {sessionState && sessionState.diners.length > 0 && (
+              <div className="bg-surface-card border-surface-border rounded-2xl border p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+                  סטטוס סועדים
+                </p>
+                <div className="flex flex-col gap-2">
+                  {sessionState.diners.map((diner) => (
+                    <div
+                      key={diner.dinerId}
+                      className="bg-surface-elevated flex items-center justify-between rounded-2xl px-3 py-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{diner.animal}</span>
+                        <div className="flex flex-col">
+                          {diner.name && (
+                            <span className="text-base font-semibold leading-tight text-white">
+                              {diner.name}
+                            </span>
+                          )}
+                          <span className="text-sm text-white/60">
+                            {diner.isDone ? '✅ סיים לבחור' : 'עדיין בוחר...'}
+                          </span>
+                        </div>
+                      </div>
+                      {diner.isAdmin && (
+                        <span className="text-accent text-xs font-medium">מנהל</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-white/40">
+                  {sessionState.diners.filter((d) => d.isDone).length} /{' '}
+                  {sessionState.diners.length} סיימו
+                </p>
+              </div>
             )}
-            <Button size="lg" fullWidth onClick={calculate}>
-              חשב חלוקה
+            <Button size="lg" fullWidth onClick={calculate} disabled={!allDone}>
+              {hasResults ? 'התבצעו שינויים - חשב מחדש' : 'כולם בחרו - חשב חלוקה'}
             </Button>
           </div>
         )}

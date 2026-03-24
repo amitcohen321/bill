@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class TablesService {
   private readonly tables = new Map<string, Table>();
   private readonly codeIndex = new Map<string, string>(); // code → tableId
+  private readonly adminTokens = new Map<string, string>(); // tableId → adminToken
 
   private generateUniqueCode(): string {
     let code: string;
@@ -15,8 +16,9 @@ export class TablesService {
     return code;
   }
 
-  createTable(): Table {
+  createTable(): Table & { adminToken: string } {
     const code = this.generateUniqueCode();
+    const adminToken = uuidv4();
     const table: Table = {
       tableId: uuidv4(),
       createdAt: new Date().toISOString(),
@@ -24,7 +26,12 @@ export class TablesService {
     };
     this.tables.set(table.tableId, table);
     this.codeIndex.set(code, table.tableId);
-    return table;
+    this.adminTokens.set(table.tableId, adminToken);
+    return { ...table, adminToken };
+  }
+
+  validateAdminToken(tableId: string, token: string): boolean {
+    return this.adminTokens.get(tableId) === token;
   }
 
   getTable(tableId: string): Table {

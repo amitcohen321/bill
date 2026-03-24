@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createTable } from '../../lib/api/tables';
-import { markAsManager } from '../../lib/manager';
+import { setAdminToken } from '../../lib/manager';
 import { Button } from '../../components/ui/Button';
 import { ApiError } from '../../lib/api/client';
 
@@ -11,7 +11,7 @@ export function CreateTableForm() {
   const mutation = useMutation({
     mutationFn: createTable,
     onSuccess: (table) => {
-      markAsManager(table.tableId);
+      setAdminToken(table.tableId, table.adminToken);
       navigate(`/tables/${table.tableId}/scan`);
     },
   });

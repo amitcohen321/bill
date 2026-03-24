@@ -4,7 +4,7 @@ import type { SessionState } from '@bill/shared';
 
 const SERVER_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
-export function useTableSession(tableId: string, isAdmin: boolean, name?: string, shouldConnect: boolean = true) {
+export function useTableSession(tableId: string, adminToken: string | null, name?: string, shouldConnect: boolean = true) {
   const [sessionState, setSessionState] = useState<SessionState | null>(null);
   const [myDinerId, setMyDinerId] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -23,7 +23,7 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     socket.on('connect', () => {
       setIsConnected(true);
       setConnectionError(null);
-      socket.emit('join-table', { tableId, isAdmin });
+      socket.emit('join-table', { tableId, ...(adminToken ? { adminToken } : {}) });
     });
 
     socket.on('disconnect', () => {
@@ -39,7 +39,6 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     });
 
     socket.on('session-state', (state: SessionState) => {
-      console.log('[session-state] received, itemReductions:', state.itemReductions);
       setSessionState(state);
     });
 
@@ -53,7 +52,7 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [tableId, isAdmin, shouldConnect]);
+  }, [tableId, adminToken, shouldConnect]);
 
   // Send name as a separate event after joining — avoids all closure timing issues
   useEffect(() => {
@@ -71,7 +70,6 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
   }, []);
 
   const reduceItem = useCallback((itemId: string, amount: number) => {
-    console.log('[reduceItem] emitting reduce-item', { itemId, amount, connected: !!socketRef.current });
     socketRef.current?.emit('reduce-item', { itemId, amount });
   }, []);
 

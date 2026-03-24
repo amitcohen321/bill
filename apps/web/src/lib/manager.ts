@@ -1,20 +1,9 @@
-const STORAGE_KEY = 'bill_managed_tables';
+const TOKEN_KEY_PREFIX = 'bill_admin_token_';
 
-function getManagedTables(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as string[];
-  } catch {
-    return [];
-  }
+export function setAdminToken(tableId: string, token: string): void {
+  localStorage.setItem(`${TOKEN_KEY_PREFIX}${tableId}`, token);
 }
 
-export function markAsManager(tableId: string): void {
-  const tables = getManagedTables();
-  if (!tables.includes(tableId)) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...tables, tableId]));
-  }
-}
-
-export function isManager(tableId: string): boolean {
-  return getManagedTables().includes(tableId);
+export function getAdminToken(tableId: string): string | null {
+  return localStorage.getItem(`${TOKEN_KEY_PREFIX}${tableId}`);
 }

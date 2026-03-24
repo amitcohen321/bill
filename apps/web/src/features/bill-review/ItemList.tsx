@@ -311,17 +311,6 @@ export function ItemList({
 
       <div className="h-px bg-surface-border" />
 
-      {onSetDone && (
-        <Button
-          size="sm"
-          fullWidth
-          variant={isDone ? 'secondary' : 'primary'}
-          onClick={onSetDone}
-        >
-          {isDone ? '↩ בטל סיום' : '✓ סיימתי לבחור'}
-        </Button>
-      )}
-
       <Card glow className="flex items-center justify-between px-4 py-4">
         <span className="text-white/70 font-medium">סה״כ</span>
         <div className="flex flex-col items-end">
@@ -335,6 +324,17 @@ export function ItemList({
           </span>
         </div>
       </Card>
+
+      {onSetDone && (
+        <Button
+          size="sm"
+          fullWidth
+          variant={isDone ? 'secondary' : 'primary'}
+          onClick={onSetDone}
+        >
+          {isDone ? '↩ בטל סיום' : '✓ סיימתי לבחור'}
+        </Button>
+      )}
     </div>
   );
 }

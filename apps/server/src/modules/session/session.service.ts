@@ -19,6 +19,7 @@ interface SessionRecord {
   socketToDiner: Map<string, string>; // socketId → dinerId
   itemReductions: Map<string, number>; // itemId → amount already paid
   results?: CalculationResult;
+  resultsStale: boolean;
 }
 
 @Injectable()
@@ -33,6 +34,7 @@ export class SessionService {
         diners: new Map(),
         socketToDiner: new Map(),
         itemReductions: new Map(),
+        resultsStale: false,
       };
       this.sessions.set(tableId, session);
     }
@@ -55,13 +57,15 @@ export class SessionService {
     name?: string,
   ): { dinerId: string; session: SessionRecord } {
     const session = this.getOrCreateSession(tableId);
+    const alreadyHasAdmin = [...session.diners.values()].some((d) => d.isAdmin);
+    const grantAdmin = isAdmin && !alreadyHasAdmin;
     const animal = this.assignAnimal(session);
     const dinerId = uuidv4();
     const diner: DinerRecord = {
       dinerId,
       animal,
       ...(name ? { name } : {}),
-      isAdmin,
+      isAdmin: grantAdmin,
       selectedItemIds: [],
       isDone: false,
       socketId,
@@ -113,6 +117,9 @@ export class SessionService {
             diner.selectedItemIds.splice(idx, 1);
           }
           diner.isDone = false;
+          if (session.results) {
+            session.resultsStale = true;
+          }
         }
         return { tableId, session };
       }
@@ -230,6 +237,7 @@ export class SessionService {
           calculatedAt: new Date().toISOString(),
         };
         session.results = results;
+        session.resultsStale = false;
         return { tableId, session };
       }
     }
@@ -249,6 +257,7 @@ export class SessionService {
       })),
       itemReductions: Object.fromEntries(session.itemReductions),
       results: session.results,
+      resultsStale: session.resultsStale,
     };
   }
 }

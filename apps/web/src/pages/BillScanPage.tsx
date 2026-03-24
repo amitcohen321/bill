@@ -2,7 +2,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageLayout } from '../components/ui/PageLayout';
 import { BillCapture } from '../features/bill-scan/BillCapture';
-import { isManager } from '../lib/manager';
+import { getAdminToken } from '../lib/manager';
 import { getTable } from '../lib/api/tables';
 
 export function BillScanPage() {
@@ -15,7 +15,7 @@ export function BillScanPage() {
   });
 
   if (!tableId) return <Navigate to="/" replace />;
-  if (!isManager(tableId)) return <Navigate to={`/tables/${tableId}`} replace />;
+  if (!getAdminToken(tableId)) return <Navigate to={`/tables/${tableId}`} replace />;
 
   return (
     <PageLayout showBack title="סריקת חשבון">

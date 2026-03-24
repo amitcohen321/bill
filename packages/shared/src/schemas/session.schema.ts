@@ -34,6 +34,7 @@ export const SessionStateSchema = z.object({
   diners: z.array(DinerSchema),
   itemReductions: z.record(z.string(), z.number()).default({}),
   results: CalculationResultSchema.optional(),
+  resultsStale: z.boolean().default(false),
 });
 
 export type SessionState = z.infer<typeof SessionStateSchema>;
