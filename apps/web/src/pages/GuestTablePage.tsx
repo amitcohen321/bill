@@ -31,14 +31,18 @@ export function GuestTablePage() {
     setNameSubmitted(true);
   };
 
-  const { data: table, isLoading, isError } = useQuery({
+  const {
+    data: table,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['table', tableId],
     queryFn: () => getTable(tableId!),
     enabled: !!tableId,
     retry: 1,
   });
 
-  const { sessionState, myDinerId, isConnected, connectionError, toggleItem, setDone, calculate } =
+  const { sessionState, myDinerId, isConnected, connectionError, toggleItem, setDone, reduceItem, calculate } =
     useTableSession(tableId ?? '', admin, submittedName, nameSubmitted);
 
   const extraction = table?.extraction;
@@ -66,27 +70,25 @@ export function GuestTablePage() {
   const myDiner = sessionState?.diners.find((d) => d.dinerId === myDinerId);
   const hasResults = !!sessionState?.results;
   const allDone =
-    (sessionState?.diners.length ?? 0) > 0 &&
-    sessionState?.diners.every((d) => d.isDone);
+    (sessionState?.diners.length ?? 0) > 0 && sessionState?.diners.every((d) => d.isDone);
   const someDone = !allDone && (sessionState?.diners.some((d) => d.isDone) ?? false);
 
   // Show name input dialog if not submitted yet
   if (!nameSubmitted) {
     return (
       <PageLayout>
-        <div className="flex flex-col gap-6 mt-6 pb-32">
+        <div className="mt-6 flex flex-col gap-6 pb-32">
           {/* Back to home button */}
           <button
             onClick={() => navigate('/')}
-            className="text-accent hover:text-accent/80 transition-colors text-sm font-medium inline-flex items-center gap-1 w-fit"
+            className="text-accent hover:text-accent/80 inline-flex w-fit items-center gap-1 text-sm font-medium transition-colors"
           >
             ← חזור לעמוד הבית
           </button>
 
-          <div className="flex flex-col gap-6 mt-14 max-w-md mx-auto">
+          <div className="mx-auto mt-14 flex max-w-md flex-col gap-6">
             <div className="flex flex-col gap-2">
               <h2 className="text-2xl font-bold text-white">הוסף את שמך</h2>
-              <p className="text-white/40 text-sm">לא חובה - הקש הכנס לדלג</p>
             </div>
 
             <Input
@@ -100,11 +102,7 @@ export function GuestTablePage() {
               }}
             />
 
-            <Button
-              size="lg"
-              fullWidth
-              onClick={handleNameSubmit}
-            >
+            <Button size="lg" fullWidth onClick={handleNameSubmit}>
               אישור
             </Button>
           </div>
@@ -115,40 +113,39 @@ export function GuestTablePage() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col gap-6 mt-6 pb-32">
-
+      <div className="mt-6 flex flex-col gap-6 pb-32">
         {/* Back to home button */}
         <button
           onClick={() => navigate('/')}
-          className="text-accent hover:text-accent/80 transition-colors text-sm font-medium inline-flex items-center gap-1 w-fit"
+          className="text-accent hover:text-accent/80 inline-flex w-fit items-center gap-1 text-sm font-medium transition-colors"
         >
           ← חזור לעמוד הבית
         </button>
 
         {/* Connection status */}
         {!isConnected && !connectionError && (
-          <div className="flex items-center gap-2 text-white/40 text-sm">
-            <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-transparent animate-spin" />
+          <div className="flex items-center gap-2 text-sm text-white/40">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-transparent" />
             <span>מתחבר...</span>
           </div>
         )}
         {connectionError && (
-          <div className="rounded-2xl bg-red-950 border border-red-800/50 p-4 text-red-300 text-sm">
+          <div className="rounded-2xl border border-red-800/50 bg-red-950 p-4 text-sm text-red-300">
             {connectionError}
           </div>
         )}
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-            <p className="text-white/40 text-sm">טוען את השולחן...</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-20">
+            <div className="border-accent h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
+            <p className="text-sm text-white/40">טוען את השולחן...</p>
           </div>
         )}
 
         {isError && (
-          <div className="rounded-2xl bg-red-950 border border-red-800/50 p-6 text-center">
-            <p className="text-red-300 font-medium">לא ניתן למצוא את השולחן</p>
-            <p className="text-red-400/60 text-sm mt-1">ודא שהקישור תקין ונסה שוב</p>
+          <div className="rounded-2xl border border-red-800/50 bg-red-950 p-6 text-center">
+            <p className="font-medium text-red-300">לא ניתן למצוא את השולחן</p>
+            <p className="mt-1 text-sm text-red-400/60">ודא שהקישור תקין ונסה שוב</p>
           </div>
         )}
 
@@ -158,9 +155,9 @@ export function GuestTablePage() {
             <span className="text-3xl">{myDiner.animal}</span>
             <div>
               {(myDiner.name || submittedName) && (
-                <p className="text-white font-medium">{myDiner.name || submittedName}</p>
+                <p className="font-medium text-white">{myDiner.name || submittedName}</p>
               )}
-              <p className="text-white/40 text-xs">אתה</p>
+              <p className="text-xs text-white/40">אתה</p>
               {myDiner.isAdmin && <p className="text-accent text-xs font-medium">מנהל שולחן</p>}
             </div>
           </div>
@@ -169,46 +166,59 @@ export function GuestTablePage() {
         {/* Admin: share QR */}
         {admin && extraction && !hasResults && <QRShare tableId={tableId} />}
 
+        {/* Admin: re-scan */}
+        {admin && extraction && !hasResults && (
+          <Button
+            variant="secondary"
+            size="md"
+            fullWidth
+            onClick={() => navigate(`/tables/${tableId}/scan`)}
+          >
+            צלם קבלה שוב
+          </Button>
+        )}
+
         {/* Participants status */}
         {sessionState && sessionState.diners.length > 0 && !hasResults && (
-          <div className="rounded-2xl bg-surface-card border border-surface-border p-4">
-            <p className="text-white/40 text-xs font-semibold uppercase tracking-wider mb-3">סטטוס סועדים</p>
+          <div className="bg-surface-card border-surface-border rounded-2xl border p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+              סטטוס סועדים
+            </p>
             <div className="flex flex-col gap-2">
               {sessionState.diners.map((diner) => (
                 <div
                   key={diner.dinerId}
-                  className="flex items-center justify-between py-2 px-3 rounded-2xl bg-surface-elevated"
+                  className="bg-surface-elevated flex items-center justify-between rounded-2xl px-3 py-2"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{diner.animal}</span>
                     <div className="flex flex-col">
                       {diner.name && (
-                        <span className="text-white text-base font-semibold leading-tight">
+                        <span className="text-base font-semibold leading-tight text-white">
                           {diner.name}
                         </span>
                       )}
-                      <span className="text-white/60 text-sm">
+                      <span className="text-sm text-white/60">
                         {diner.isDone ? '✓ סיים לבחור' : 'עדיין בוחר'}
                       </span>
                     </div>
                   </div>
-                  {diner.isAdmin && (
-                    <span className="text-accent text-xs font-medium">מנהל</span>
-                  )}
+                  {diner.isAdmin && <span className="text-accent text-xs font-medium">מנהל</span>}
                 </div>
               ))}
             </div>
-            <p className="text-white/40 text-xs mt-3">
-              {sessionState.diners.filter((d) => d.isDone).length} / {sessionState.diners.length} סיימו
+            <p className="mt-3 text-xs text-white/40">
+              {sessionState.diners.filter((d) => d.isDone).length} / {sessionState.diners.length}{' '}
+              סיימו
             </p>
           </div>
         )}
 
         {/* Waiting for scan */}
         {table && !extraction && !isLoading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-            <p className="text-white font-semibold text-lg">ממתין לסריקת החשבון</p>
-            <p className="text-white/40 text-sm">מנהל השולחן עוד לא סרק את החשבון</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+            <p className="text-lg font-semibold text-white">ממתין לסריקת החשבון</p>
+            <p className="text-sm text-white/40">מנהל השולחן עוד לא סרק את החשבון</p>
           </div>
         )}
 
@@ -225,19 +235,7 @@ export function GuestTablePage() {
         {/* Item selection */}
         {extraction && !hasResults && (
           <>
-            <div className="flex flex-col gap-3">
-              <h2 className="text-2xl font-bold text-white">בחר את הפריטים שלך</h2>
-              {admin && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  fullWidth
-                  onClick={() => navigate(`/tables/${tableId}/scan`)}
-                >
-                  צלם קבלה שוב
-                </Button>
-              )}
-            </div>
+            <h2 className="text-2xl font-bold text-white">בחר את הפריטים שלך</h2>
 
             <ItemList
               items={extraction.items}
@@ -248,6 +246,9 @@ export function GuestTablePage() {
               itemParticipants={itemParticipants}
               isDone={myDiner?.isDone}
               onSetDone={setDone}
+              admin={admin}
+              itemReductions={sessionState?.itemReductions}
+              onReduceItem={admin ? reduceItem : undefined}
             />
           </>
         )}
@@ -256,9 +257,7 @@ export function GuestTablePage() {
         {admin && extraction && !hasResults && (
           <div className="flex flex-col gap-3 pt-2">
             {someDone && (
-              <p className="text-yellow-400/70 text-sm text-center">
-                לא כולם סיימו לבחור
-              </p>
+              <p className="text-center text-sm text-yellow-400/70">לא כולם סיימו לבחור</p>
             )}
             <Button size="lg" fullWidth onClick={calculate}>
               חשב חלוקה

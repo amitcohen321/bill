@@ -39,6 +39,7 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     });
 
     socket.on('session-state', (state: SessionState) => {
+      console.log('[session-state] received, itemReductions:', state.itemReductions);
       setSessionState(state);
     });
 
@@ -69,6 +70,11 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     socketRef.current?.emit('set-done');
   }, []);
 
+  const reduceItem = useCallback((itemId: string, amount: number) => {
+    console.log('[reduceItem] emitting reduce-item', { itemId, amount, connected: !!socketRef.current });
+    socketRef.current?.emit('reduce-item', { itemId, amount });
+  }, []);
+
   const calculate = useCallback(() => {
     socketRef.current?.emit('calculate');
   }, []);
@@ -80,6 +86,7 @@ export function useTableSession(tableId: string, isAdmin: boolean, name?: string
     connectionError,
     toggleItem,
     setDone,
+    reduceItem,
     calculate,
   };
 }

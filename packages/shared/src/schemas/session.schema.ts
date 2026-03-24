@@ -32,6 +32,7 @@ export type CalculationResult = z.infer<typeof CalculationResultSchema>;
 export const SessionStateSchema = z.object({
   tableId: z.string(),
   diners: z.array(DinerSchema),
+  itemReductions: z.record(z.string(), z.number()).default({}),
   results: CalculationResultSchema.optional(),
 });
 
@@ -50,3 +51,10 @@ export const ToggleItemPayloadSchema = z.object({
 });
 
 export type ToggleItemPayload = z.infer<typeof ToggleItemPayloadSchema>;
+
+export const ReduceItemPayloadSchema = z.object({
+  itemId: z.string(),
+  amount: z.number().nonnegative(),
+});
+
+export type ReduceItemPayload = z.infer<typeof ReduceItemPayloadSchema>;

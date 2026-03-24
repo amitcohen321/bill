@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { BillItem, ItemCategory } from '@bill/shared';
 import { ITEM_CATEGORIES } from '@bill/shared';
 import { Card } from '../../components/ui/Card';
@@ -57,6 +58,9 @@ interface ItemListProps {
   itemParticipants?: Map<string, string[]>; // itemId → animal emojis
   isDone?: boolean | undefined;
   onSetDone?: (() => void) | undefined;
+  admin?: boolean | undefined;
+  itemReductions?: Record<string, number> | undefined;
+  onReduceItem?: ((itemId: string, amount: number) => void) | undefined;
 }
 
 interface ItemRowProps {
@@ -66,52 +70,167 @@ interface ItemRowProps {
   currencySymbol: string;
   participants: string[];
   onToggle: () => void;
+  reduction: number;
+  admin: boolean;
+  onReduce: ((amount: number) => void) | undefined;
 }
 
-function ItemRow({ item, selected, dupeColor: _dupeColor, currencySymbol, participants, onToggle }: ItemRowProps) {
+function ItemRow({ item, selected, dupeColor: _dupeColor, currencySymbol, participants, onToggle, reduction, admin, onReduce }: ItemRowProps) {
   const otherParticipants = participants;
+  const [editing, setEditing] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const ignored = reduction >= item.price;
+  const effectivePrice = Math.max(0, item.price - reduction);
+
+  const handleSaveReduction = () => {
+    const val = parseFloat(inputValue);
+    if (!isNaN(val) && val >= 0 && val <= item.price) {
+      onReduce?.(val);
+    }
+    setEditing(false);
+    setInputValue('');
+  };
 
   return (
     <div
       className={[
         'rounded-3xl border overflow-hidden transition-all duration-150',
-        selected ? 'shadow-glow-sm bg-accent/15 border-accent/30' : 'shadow-card bg-surface-card border-surface-border',
+        ignored
+          ? 'opacity-50 bg-surface-card border-surface-border'
+          : selected
+            ? 'shadow-glow-sm bg-accent/15 border-accent/30'
+            : 'shadow-card bg-surface-card border-surface-border',
       ].join(' ')}
     >
       <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3.5 gap-3 text-right active:scale-[0.98]"
+        onClick={ignored ? undefined : onToggle}
+        disabled={ignored}
+        className={[
+          'w-full flex items-center justify-between px-4 py-3.5 gap-3 text-right',
+          ignored ? 'cursor-default' : 'active:scale-[0.98]',
+        ].join(' ')}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className={[
-            'w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors duration-150',
-            selected ? 'border-accent bg-accent' : 'border-white/20',
-          ].join(' ')}>
-            {selected && (
-              <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </div>
+          {!ignored && (
+            <div className={[
+              'w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors duration-150',
+              selected ? 'border-accent bg-accent' : 'border-white/20',
+            ].join(' ')}>
+              {selected && (
+                <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          )}
           <div className="flex flex-col items-start min-w-0">
-            <span className={['text-lg font-medium leading-snug truncate w-full', selected ? 'text-white' : 'text-white/80'].join(' ')}>
+            <span className={[
+              'text-lg font-medium leading-snug truncate w-full',
+              ignored ? 'line-through text-white/40' : selected ? 'text-white' : 'text-white/80',
+            ].join(' ')}>
               {item.name}
             </span>
-            {otherParticipants.length > 0 && (
+            {!ignored && otherParticipants.length > 0 && (
               <span className="text-sm leading-none text-white/50 mt-0.5">
                 {otherParticipants.join(', ')}
               </span>
             )}
-            {otherParticipants.length === 0 && (
+            {!ignored && otherParticipants.length === 0 && (
               <span className="text-white/25 text-sm mt-0.5">אף אחד</span>
             )}
           </div>
         </div>
 
-        <span className={['font-semibold text-xl tabular-nums shrink-0', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
-          {currencySymbol}{item.price.toFixed(2)}
-        </span>
+        <div className="flex flex-col items-end shrink-0">
+          {ignored ? (
+            <span className="font-semibold text-xl tabular-nums line-through text-white/30">
+              {currencySymbol}{item.price.toFixed(2)}
+            </span>
+          ) : reduction > 0 ? (
+            <>
+              <span className="text-white/40 text-sm line-through tabular-nums">
+                {currencySymbol}{item.price.toFixed(2)}
+              </span>
+              <span className={['font-semibold text-xl tabular-nums', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
+                {currencySymbol}{effectivePrice.toFixed(2)}
+              </span>
+            </>
+          ) : (
+            <span className={['font-semibold text-xl tabular-nums', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
+              {currencySymbol}{item.price.toFixed(2)}
+            </span>
+          )}
+        </div>
       </button>
+
+      {admin && onReduce && !editing && (
+        <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
+          {ignored ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onReduce(0); }}
+              className="text-xs text-accent hover:text-accent/80 font-medium transition-colors"
+            >
+              שחזר פריט
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); setEditing(true); setInputValue(reduction > 0 ? String(reduction) : ''); }}
+                className="text-xs text-white/40 hover:text-white/70 transition-colors"
+              >
+                {reduction > 0 ? `הופחת ${currencySymbol}${reduction.toFixed(2)} — ערוך` : 'הפחת סכום'}
+              </button>
+              <span className="text-white/20">|</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onReduce(item.price); }}
+                className="text-xs text-red-400/60 hover:text-red-400 transition-colors"
+              >
+                התעלם מפריט
+              </button>
+              {reduction > 0 && (
+                <>
+                  <span className="text-white/20">|</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onReduce(0); }}
+                    className="text-xs text-accent/60 hover:text-accent transition-colors"
+                  >
+                    שחזר
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {admin && editing && (
+        <div className="px-4 pb-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="number"
+            min={0}
+            max={item.price}
+            step="0.01"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSaveReduction(); }}
+            placeholder={`עד ${item.price.toFixed(2)}`}
+            autoFocus
+            className="w-24 rounded-lg bg-white/10 border border-white/20 px-2 py-1 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50"
+          />
+          <button
+            onClick={handleSaveReduction}
+            className="text-xs text-accent hover:text-accent/80 font-medium transition-colors"
+          >
+            שמור
+          </button>
+          <button
+            onClick={() => { setEditing(false); setInputValue(''); }}
+            className="text-xs text-white/40 hover:text-white/70 transition-colors"
+          >
+            ביטול
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -125,8 +244,16 @@ export function ItemList({
   itemParticipants,
   isDone,
   onSetDone,
+  admin,
+  itemReductions,
+  onReduceItem,
 }: ItemListProps) {
-  const total = items.reduce((sum, item) => sum + item.price, 0);
+  const originalTotal = items.reduce((sum, item) => sum + item.price, 0);
+  const total = items.reduce((sum, item) => {
+    const reduction = itemReductions?.[item.id] ?? 0;
+    return sum + Math.max(0, item.price - reduction);
+  }, 0);
+  const hasReductions = total !== originalTotal;
   const currencySymbol = currency === 'ILS' ? '₪' : currency;
   const dupeColors = buildDupeColorMap(items);
 
@@ -174,6 +301,9 @@ export function ItemList({
               currencySymbol={currencySymbol}
               participants={itemParticipants?.get(item.id) ?? []}
               onToggle={() => onToggle(item.id)}
+              reduction={itemReductions?.[item.id] ?? 0}
+              admin={!!admin}
+              onReduce={onReduceItem ? (amount) => onReduceItem(item.id, amount) : undefined}
             />
           ))}
         </div>
@@ -194,9 +324,16 @@ export function ItemList({
 
       <Card glow className="flex items-center justify-between px-4 py-4">
         <span className="text-white/70 font-medium">סה״כ</span>
-        <span className="text-white font-bold text-xl tabular-nums">
-          {currencySymbol}{total.toFixed(2)}
-        </span>
+        <div className="flex flex-col items-end">
+          {hasReductions && (
+            <span className="text-white/40 text-sm line-through tabular-nums">
+              {currencySymbol}{originalTotal.toFixed(2)}
+            </span>
+          )}
+          <span className="text-white font-bold text-xl tabular-nums">
+            {currencySymbol}{total.toFixed(2)}
+          </span>
+        </div>
       </Card>
     </div>
   );

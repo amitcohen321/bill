@@ -17,6 +17,7 @@ interface SessionRecord {
   tableId: string;
   diners: Map<string, DinerRecord>; // dinerId → DinerRecord
   socketToDiner: Map<string, string>; // socketId → dinerId
+  itemReductions: Map<string, number>; // itemId → amount already paid
   results?: CalculationResult;
 }
 
@@ -31,6 +32,7 @@ export class SessionService {
         tableId,
         diners: new Map(),
         socketToDiner: new Map(),
+        itemReductions: new Map(),
       };
       this.sessions.set(tableId, session);
     }
@@ -132,6 +134,29 @@ export class SessionService {
     return { tableId: null, session: null };
   }
 
+  reduceItem(
+    socketId: string,
+    itemId: string,
+    amount: number,
+  ): { tableId: string | null; session: SessionRecord | null; error?: string } {
+    for (const [tableId, session] of this.sessions) {
+      const dinerId = session.socketToDiner.get(socketId);
+      if (dinerId !== undefined) {
+        const diner = session.diners.get(dinerId);
+        if (!diner?.isAdmin) {
+          return { tableId, session, error: 'Only the admin can reduce items' };
+        }
+        if (amount <= 0) {
+          session.itemReductions.delete(itemId);
+        } else {
+          session.itemReductions.set(itemId, amount);
+        }
+        return { tableId, session };
+      }
+    }
+    return { tableId: null, session: null };
+  }
+
   calculate(
     socketId: string,
     tablesService: TablesService,
@@ -156,19 +181,36 @@ export class SessionService {
         }
 
         const { items, currency } = table.extraction;
-        const priceMap = new Map<string, number>(items.map((item) => [item.id, item.price]));
+        const priceMap = new Map<string, number>(
+          items.map((item) => {
+            const reduction = session.itemReductions.get(item.id) ?? 0;
+            return [item.id, Math.max(0, item.price - reduction)];
+          }),
+        );
+
+        // Items fully ignored (reduction >= price) should not count
+        const ignoredItems = new Set<string>();
+        for (const item of items) {
+          const reduction = session.itemReductions.get(item.id) ?? 0;
+          if (reduction >= item.price) {
+            ignoredItems.add(item.id);
+          }
+        }
 
         // Count how many diners selected each item (for equal split)
         const itemParticipantCount = new Map<string, number>();
         for (const d of session.diners.values()) {
           for (const itemId of d.selectedItemIds) {
-            itemParticipantCount.set(itemId, (itemParticipantCount.get(itemId) ?? 0) + 1);
+            if (!ignoredItems.has(itemId)) {
+              itemParticipantCount.set(itemId, (itemParticipantCount.get(itemId) ?? 0) + 1);
+            }
           }
         }
 
         const dinerResults = [...session.diners.values()].map((d) => {
           let total = 0;
           for (const itemId of d.selectedItemIds) {
+            if (ignoredItems.has(itemId)) continue;
             const price = priceMap.get(itemId) ?? 0;
             const count = itemParticipantCount.get(itemId) ?? 1;
             total += price / count;
@@ -205,6 +247,7 @@ export class SessionService {
         selectedItemIds: [...d.selectedItemIds],
         isDone: d.isDone,
       })),
+      itemReductions: Object.fromEntries(session.itemReductions),
       results: session.results,
     };
   }

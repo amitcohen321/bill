@@ -105,6 +105,38 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('reduce-item')
+  handleReduceItem(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: unknown,
+  ) {
+    if (
+      typeof payload !== 'object' ||
+      payload === null ||
+      typeof (payload as Record<string, unknown>)['itemId'] !== 'string' ||
+      typeof (payload as Record<string, unknown>)['amount'] !== 'number'
+    ) {
+      client.emit('error', { code: 'INVALID_PAYLOAD', message: 'Invalid reduce-item payload' });
+      return;
+    }
+
+    const { itemId, amount } = payload as { itemId: string; amount: number };
+    console.log('[reduce-item] received', { socketId: client.id, itemId, amount });
+    const { tableId, session, error } = this.sessionService.reduceItem(client.id, itemId, amount);
+
+    console.log('[reduce-item] result', { tableId, error, hasSession: !!session });
+    if (error) {
+      client.emit('error', { code: 'REDUCE_ERROR', message: error });
+      return;
+    }
+
+    if (tableId && session) {
+      const state = this.sessionService.toSessionState(session);
+      console.log('[reduce-item] broadcasting state, itemReductions:', state.itemReductions);
+      this.server.to(tableId).emit('session-state', state);
+    }
+  }
+
   @SubscribeMessage('calculate')
   handleCalculate(@ConnectedSocket() client: Socket) {
     const { tableId, session, error } = this.sessionService.calculate(

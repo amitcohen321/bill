@@ -6,8 +6,8 @@ const EnvSchema = z.object({
     .optional()
     .default('3001')
     .transform((v) => parseInt(v, 10)),
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
-  OPENAI_MODEL: z.string().optional().default('gpt-4o'),
+  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
+  GEMINI_MODEL: z.string().optional().default('gemini-2.5-flash'),
   NODE_ENV: z.enum(['development', 'production', 'test']).optional().default('development'),
 });
 

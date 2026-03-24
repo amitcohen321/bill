@@ -20,7 +20,7 @@ export const BillExtractionResponseSchema = z.object({
   warnings: z.array(z.string()).default([]),
 });
 
-export const OpenAIExtractionResultSchema = z.object({
+export const ExtractionResultSchema = z.object({
   items: z.array(
     z.object({
       name: z.string(),
@@ -34,4 +34,5 @@ export const OpenAIExtractionResultSchema = z.object({
 
 export type BillItem = z.infer<typeof BillItemSchema>;
 export type BillExtractionResponse = z.infer<typeof BillExtractionResponseSchema>;
-export type OpenAIExtractionResult = z.infer<typeof OpenAIExtractionResultSchema>;
+export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
+

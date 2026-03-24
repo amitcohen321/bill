@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { BillExtractionResponse, DEFAULT_CURRENCY, ALLOWED_IMAGE_TYPES } from '@bill/shared';
-import { OpenAIExtractionService } from './openai-extraction.service';
+import { GeminiExtractionService } from './gemini-extraction.service';
 import { TablesService } from '../tables/tables.service';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class BillExtractionService {
   private readonly logger = new Logger(BillExtractionService.name);
 
   constructor(
-    private readonly openAIExtractionService: OpenAIExtractionService,
+    private readonly geminiExtractionService: GeminiExtractionService,
     private readonly tablesService: TablesService,
   ) {}
 
@@ -33,7 +33,7 @@ export class BillExtractionService {
 
     let extractionResult;
     try {
-      extractionResult = await this.openAIExtractionService.extractBillItems(
+      extractionResult = await this.geminiExtractionService.extractBillItems(
         file.buffer,
         mimeType,
       );
