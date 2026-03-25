@@ -62,7 +62,6 @@ export function CreateTablePage() {
   return (
     <PageLayout showBack title="שולחן חדש">
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-6">
-        {/* Bill image */}
         <div className="flex flex-col gap-3">
           <span className="text-sm font-medium text-white/60">
             צלמו את החשבון מלמעלה, ברור, ועם פלאש במידת הצורך

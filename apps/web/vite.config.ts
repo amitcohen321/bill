@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'og-image.jpg', 'icons/*.png'],
       manifest: {
-        name: 'Bill Split',
-        short_name: 'Bill',
+        name: 'Billy',
+        short_name: 'Billy',
         description: 'Split restaurant bills with your table',
         theme_color: '#0a0a14',
         background_color: '#0a0a14',
