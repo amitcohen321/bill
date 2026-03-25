@@ -181,7 +181,7 @@ export function GuestTablePage() {
 
         {/* My identity */}
         {myDiner && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <span className="text-3xl">{myDiner.animal}</span>
             <div>
               {(myDiner.name || submittedName) && (

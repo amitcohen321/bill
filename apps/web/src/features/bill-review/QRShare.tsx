@@ -44,9 +44,9 @@ export function QRShare({ tableId }: QRShareProps) {
       </div>
 
       {table?.code && (
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-0.5">
           <span className="text-white/40 text-xs font-medium">קוד הצטרפות לשולחן</span>
-          <span className="text-white font-bold text-4xl tabular-nums tracking-[0.2em]">
+          <span className="text-white font-bold text-[clamp(1.75rem,8vw,2.25rem)] tabular-nums tracking-[0.15em]">
             {table.code}
           </span>
         </div>
