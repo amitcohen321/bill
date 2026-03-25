@@ -64,7 +64,7 @@ export function TipSelector({ tipPercent, onTipChange }: TipSelectorProps) {
               : 'bg-surface-elevated border-surface-border text-white/60 hover:text-white hover:border-white/20',
           ].join(' ')}
         >
-          מותאם
+          <span>מותאם %</span> <span>%</span>
         </button>
       </div>
 
