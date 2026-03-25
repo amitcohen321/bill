@@ -37,7 +37,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen-safe flex flex-col bg-surface overflow-hidden">
+    <div className="h-dvh flex flex-col bg-surface overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />

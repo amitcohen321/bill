@@ -23,7 +23,7 @@ export function GuestTablePage() {
 
   const persistedName = tableId ? getPersistedName(tableId) : '';
   const [nameInput, setNameInput] = useState(persistedName);
-  const [nameSubmitted, setNameSubmitted] = useState(persistedName !== '' || admin);
+  const [nameSubmitted, setNameSubmitted] = useState(persistedName !== '');
   const [submittedName, setSubmittedName] = useState<string | undefined>(
     persistedName || undefined,
   );
