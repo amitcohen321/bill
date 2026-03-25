@@ -95,23 +95,25 @@ export function HomePage() {
           {/* Code entry */}
           <div className="flex flex-col gap-2">
             <div className={[
-              'flex items-center rounded-2xl border bg-surface-elevated px-4 gap-3 transition-colors',
+              'flex flex-col rounded-2xl border bg-surface-elevated px-4 pt-3 pb-1 transition-colors',
               joinError ? 'border-red-500/50' : 'border-surface-border focus-within:border-accent/40',
             ].join(' ')}>
-              <span className="text-white/30 text-sm shrink-0">קוד הצטרפות לשולחן</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={4}
-                value={code}
-                onChange={(e) => handleCodeChange(e.target.value)}
-                placeholder="0000"
-                className="flex-1 bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-3.5 outline-none placeholder-white/15"
-              />
-              {joinMutation.isPending && (
-                <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />
-              )}
+              <span className="text-white/30 text-xs text-center">קוד הצטרפות לשולחן</span>
+              <div className="flex items-center justify-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  value={code}
+                  onChange={(e) => handleCodeChange(e.target.value)}
+                  placeholder="0000"
+                  className="w-full bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-2.5 outline-none placeholder-white/15"
+                />
+                {joinMutation.isPending && (
+                  <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />
+                )}
+              </div>
             </div>
 
             {joinError && (

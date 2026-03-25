@@ -67,6 +67,11 @@ export function ResultsView({ results, myDinerId, items, admin = false, onGoBack
     return map;
   }, [results]);
 
+  const unclaimedItems = useMemo(
+    () => items.filter((item) => !itemSplitMap.has(item.id)),
+    [items, itemSplitMap],
+  );
+
   // Map items to diners who selected them
   const itemToDinersMap = useMemo(() => {
     const map = new Map<string, Array<{ animal: string; name?: string; dinerId: string }>>();
@@ -96,13 +101,24 @@ export function ResultsView({ results, myDinerId, items, admin = false, onGoBack
 
       {/* Warning if not fully paid */}
       {!isFullyPaid && (
-        <div className="rounded-2xl bg-yellow-950 border border-yellow-800/50 p-4">
+        <div className="rounded-2xl bg-yellow-950 border border-yellow-800/50 p-4 flex flex-col gap-2">
           <p className="text-yellow-300 text-sm flex gap-2">
             <span>⚠️</span>
             <span>
               נותר לתשלום: {currencySymbol}{(originalTotal - paidTotal).toFixed(2)} - לא כל הסכום חולק
             </span>
           </p>
+          {unclaimedItems.length > 0 && (
+            <div className="text-yellow-400/80 text-xs flex flex-col gap-1 pr-6">
+              <p className="font-semibold">פריטים שאף אחד לא סימן:</p>
+              {unclaimedItems.map((item) => (
+                <div key={item.id} className="flex justify-between gap-2">
+                  <span>{item.name}</span>
+                  <span className="tabular-nums">{currencySymbol}{item.price.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
