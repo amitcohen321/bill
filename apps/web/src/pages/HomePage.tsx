@@ -37,9 +37,9 @@ export function HomePage() {
   }
 
   return (
-    <div className="h-dvh flex flex-col bg-surface overflow-hidden">
+    <div className="h-dvh flex flex-col bg-surface">
       {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-secondary/8 rounded-full blur-3xl" />
       </div>
@@ -51,15 +51,15 @@ export function HomePage() {
             onClick={() => navigate(`/tables/${lastTableId}`)}
             className="flex items-center gap-1.5 rounded-2xl border border-surface-border bg-surface-elevated/80 backdrop-blur px-3 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
           >
-           → חזרה לשולחן 
+           → חזרה לשולחן
           </button>
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-12">
+      <div className="relative flex-1 flex flex-col items-center px-6 py-8 overflow-y-auto">
         {/* Top — logo / branding */}
-        <div className="flex flex-col items-center gap-3" style={{ marginTop: '10px' }}>
-          <img src="/hero.png" alt="Billy" className="w-64 h-64 object-contain drop-shadow-2xl" />
+        <div className="flex flex-col items-center gap-3">
+          <img src="/hero.png" alt="Billy" className="w-52 h-52 sm:w-64 sm:h-64 object-contain drop-shadow-2xl" />
           <h1 className="text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
@@ -67,7 +67,7 @@ export function HomePage() {
         </div>
 
         {/* Middle — feature highlights (horizontal) */}
-        <div className="w-full max-w-sm flex flex-col gap-3">
+        <div className="w-full max-w-sm flex flex-col gap-3 mt-6">
           <div className="flex gap-2">
             <FeatureCard icon="📸" text="צילום של החשבון" />
             <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
@@ -75,14 +75,14 @@ export function HomePage() {
           </div>
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
-              <span className="text-xs font-semibold text-accent tracking-wide">✨ Powered by AI</span>
+              <span className="text-xs font-semibold text-accent tracking-wide whitespace-nowrap">✨ Powered by AI</span>
             </div>
           </div>
         </div>
 
         {/* Bottom — CTAs */}
-        <div className="w-full max-w-sm flex flex-col gap-4">
-          <Button size="lg" fullWidth onClick={() => navigate('/create-table')} className="mt-8">
+        <div className="w-full max-w-sm flex flex-col gap-4 mt-auto pt-6">
+          <Button size="lg" fullWidth onClick={() => navigate('/create-table')}>
             צור שולחן
           </Button>
 
@@ -121,7 +121,7 @@ export function HomePage() {
             )}
           </div>
 
-          <p className="text-center text-white/30 text-xs">
+          <p className="text-center text-white/30 text-xs pb-2">
             ללא הרשמה · ללא חשבון · מיידי
           </p>
         </div>
