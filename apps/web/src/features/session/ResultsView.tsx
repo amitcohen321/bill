@@ -39,7 +39,6 @@ export function ResultsView({
     setTipPct(pct);
     setIsCustomMode(false);
     setCustomTip('');
-    if (pct === 0) setRoundUp(false);
   }
 
   function handleCustomTipChange(val: string) {
@@ -54,7 +53,6 @@ export function ResultsView({
     setIsCustomMode(true);
     setTipPct(0);
     setCustomTip('');
-    setRoundUp(false);
   }
 
   // Calculate original bill total and check if fully paid
@@ -147,19 +145,17 @@ export function ResultsView({
               {currencySymbol}
               {roundUp ? totalWithTip : totalWithTip.toFixed(2)}
             </p>
-            {tipPct > 0 && (
-              <button
-                onClick={() => setRoundUp((r) => !r)}
-                className={[
-                  'self-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
-                  roundUp
-                    ? 'bg-accent border-accent text-black'
-                    : 'border-white/20 bg-transparent text-white/60 hover:border-white/40',
-                ].join(' ')}
-              >
-                עיגול סכום
-              </button>
-            )}
+            <button
+              onClick={() => setRoundUp((r) => !r)}
+              className={[
+                'self-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                roundUp
+                  ? 'bg-accent border-accent text-black'
+                  : 'border-white/20 bg-transparent text-white/60 hover:border-white/40',
+              ].join(' ')}
+            >
+              עיגול סכום
+            </button>
           </div>
 
           {/* Tip selector */}
