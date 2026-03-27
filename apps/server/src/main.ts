@@ -12,7 +12,7 @@ async function bootstrap() {
     logger: ['log', 'warn', 'error'],
   });
 
-  const publicDir = join(__dirname, '..', '..', '..', '..', 'public');
+  const publicDir = join(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'web', 'dist');
   app.useStaticAssets(publicDir);
 
   app.setGlobalPrefix('api');
