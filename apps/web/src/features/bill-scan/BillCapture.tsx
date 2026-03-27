@@ -66,17 +66,17 @@ export function BillCapture({ tableId }: BillCaptureProps) {
   if (preview && selectedFile) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="relative rounded-3xl overflow-hidden border border-surface-border bg-surface-card aspect-[3/4] w-full">
+        <div className="border-surface-border bg-surface-card relative aspect-[3/4] w-full overflow-hidden rounded-3xl border">
           <img
             src={preview}
             alt="תצוגה מקדימה של החשבון"
-            className="w-full h-full object-contain"
+            className="h-full w-full object-contain"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
 
         {mutation.isError && (
-          <div className="rounded-2xl bg-red-950 border border-red-800/50 p-4 text-red-300 text-sm">
+          <div className="rounded-2xl border border-red-800/50 bg-red-950 p-4 text-sm text-red-300">
             {mutation.error instanceof ApiError && mutation.error.code === 'BILL_EXTRACTION_FAILED'
               ? mutation.error.message
               : 'שגיאה בעיבוד החשבון. נסה לצלם שוב.'}
@@ -84,12 +84,7 @@ export function BillCapture({ tableId }: BillCaptureProps) {
         )}
 
         <div className="flex flex-col gap-3">
-          <Button
-            size="lg"
-            fullWidth
-            onClick={handleSubmit}
-            loading={mutation.isPending}
-          >
+          <Button size="lg" fullWidth onClick={handleSubmit} loading={mutation.isPending}>
             {mutation.isPending ? 'מעבד את החשבון...' : 'עבד חשבון'}
           </Button>
           <Button
@@ -109,36 +104,31 @@ export function BillCapture({ tableId }: BillCaptureProps) {
   return (
     <div className="flex flex-col gap-6">
       <div
-        className="relative rounded-3xl border-2 border-dashed border-surface-border bg-surface-card flex flex-col items-center justify-center gap-4 py-16 px-6 cursor-pointer hover:border-accent/40 transition-colors"
+        className="border-surface-border bg-surface-card hover:border-accent/40 relative flex cursor-pointer flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed px-6 py-16 transition-colors"
         onClick={() => cameraInputRef.current?.click()}
       >
-        <div className="w-16 h-16 rounded-2xl bg-gradient-card border border-accent/20 flex items-center justify-center">
+        <div className="bg-gradient-card border-accent/20 flex h-16 w-16 items-center justify-center rounded-2xl border">
           <CameraIcon />
         </div>
         <div className="text-center">
-          <p className="text-white font-medium">צלם את החשבון</p>
-          <p className="text-white/40 text-sm mt-1">הקש כדי לפתוח את המצלמה</p>
+          <p className="font-medium text-white">צלם את החשבון</p>
+          <p className="mt-1 text-sm text-white/40">הקש כדי לפתוח את המצלמה</p>
         </div>
       </div>
 
       {fileError && (
-        <div className="rounded-2xl bg-red-950 border border-red-800/50 p-4 text-red-300 text-sm">
+        <div className="rounded-2xl border border-red-800/50 bg-red-950 p-4 text-sm text-red-300">
           {fileError}
         </div>
       )}
 
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-surface-border" />
-        <span className="text-white/30 text-sm">או</span>
-        <div className="flex-1 h-px bg-surface-border" />
+        <div className="bg-surface-border h-px flex-1" />
+        <span className="text-sm text-white/30">או</span>
+        <div className="bg-surface-border h-px flex-1" />
       </div>
 
-      <Button
-        variant="secondary"
-        size="md"
-        fullWidth
-        onClick={() => fileInputRef.current?.click()}
-      >
+      <Button variant="secondary" size="md" fullWidth onClick={() => fileInputRef.current?.click()}>
         <GalleryIcon />
         בחר מהגלריה
       </Button>
@@ -169,12 +159,7 @@ export function BillCapture({ tableId }: BillCaptureProps) {
 
 function CameraIcon() {
   return (
-    <svg
-      className="w-8 h-8 text-accent"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
+    <svg className="text-accent h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -193,12 +178,7 @@ function CameraIcon() {
 
 function GalleryIcon() {
   return (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

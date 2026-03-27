@@ -63,7 +63,7 @@ export function CreateTablePage() {
     <PageLayout showBack title="שולחן חדש">
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-white/60">
+          <span className="text-lg font-medium text-white/60">
             צלמו את החשבון מלמעלה, ברור, ועם פלאש במידת הצורך
           </span>
 
@@ -139,6 +139,9 @@ export function CreateTablePage() {
         <Button type="submit" size="lg" fullWidth loading={isPending} disabled={isPending}>
           {isPending ? 'מעבד...' : 'צור שולחן'}
         </Button>
+        {isPending && (
+          <p className="text-center text-white/70 text-base font-medium">⏳ העיבוד עשוי לקחת עד 10 שניות</p>
+        )}
 
         {/* Hidden file inputs */}
         <input

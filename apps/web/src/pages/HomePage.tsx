@@ -59,7 +59,7 @@ export function HomePage() {
       <div className="relative flex-1 flex flex-col items-center px-6 py-8 overflow-y-auto">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3">
-          <img src="/hero.png" alt="Billy" className="w-52 h-52 sm:w-64 sm:h-64 object-contain drop-shadow-2xl" />
+          <img src="/hero.png" alt="Billy" className="w-72 h-72 sm:w-80 sm:h-80 object-contain drop-shadow-2xl" />
           <h1 className="text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
@@ -69,9 +69,9 @@ export function HomePage() {
         {/* Middle — feature highlights (horizontal) */}
         <div className="w-full max-w-sm flex flex-col gap-3 mt-6">
           <div className="flex gap-2">
-            <FeatureCard icon="📸" text="צילום של החשבון" />
-            <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
-            <FeatureCard icon="✂️" text="פיצול קל בין כולם" />
+            <FeatureCard step={1} icon="📸" text="צילום של החשבון" />
+            <FeatureCard step={2} icon="🤖" text="חילוץ פריטים אוטומטי" />
+            <FeatureCard step={3} icon="✂️" text="פיצול קל בין כולם" />
           </div>
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
@@ -130,9 +130,10 @@ export function HomePage() {
   );
 }
 
-function FeatureCard({ icon, text }: { icon: string; text: string }) {
+function FeatureCard({ step, icon, text }: { step: number; icon: string; text: string }) {
   return (
     <div className="flex-1 flex flex-col items-center gap-2 rounded-2xl bg-surface-card border border-surface-border px-3 py-3.5 text-center">
+      <span className="text-accent text-xs font-bold tabular-nums">{step}</span>
       <span className="text-2xl">{icon}</span>
       <span className="text-white/80 text-xs font-medium leading-snug">{text}</span>
     </div>

@@ -24,7 +24,7 @@ export function BillScanPage() {
           <div>
             <h2 className="text-2xl font-bold text-white">צלם את החשבון</h2>
             <p className="text-white/50 mt-1">וודא שהחשבון מוצג בצורה ברורה</p>
-            <p className="text-white/35 mt-0.5 text-sm">מומלץ להשתמש בפלאש לתאורה טובה יותר</p>
+            <p className="text-white/50 mt-0.5 text-base">מומלץ להשתמש בפלאש לתאורה טובה יותר</p>
           </div>
 
           {table?.code && (

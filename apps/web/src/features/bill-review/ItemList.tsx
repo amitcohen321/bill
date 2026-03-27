@@ -20,34 +20,11 @@ const CATEGORY_EMOJI: Record<ItemCategory, string> = {
   other: '📦',
 };
 
-const DUPE_COLORS = [
-  '#60a5fa',
-  '#34d399',
-  '#fb923c',
-  '#f472b6',
-  '#facc15',
-  '#2dd4bf',
-  '#f87171',
-  '#c084fc',
-];
-
-function buildDupeColorMap(items: BillItem[]): Map<string, string> {
-  const nameToIds = new Map<string, string[]>();
-  for (const item of items) {
-    const group = nameToIds.get(item.name) ?? [];
-    group.push(item.id);
-    nameToIds.set(item.name, group);
-  }
-  const map = new Map<string, string>();
-  for (const ids of nameToIds.values()) {
-    if (ids.length >= 2) {
-      ids.forEach((id, i) => {
-        map.set(id, DUPE_COLORS[i % DUPE_COLORS.length] ?? DUPE_COLORS[0]!);
-      });
-    }
-  }
-  return map;
-}
+const FRACTION_OPTIONS = [
+  { label: '¼', value: 1 / 4 },
+  { label: '⅓', value: 1 / 3 },
+  { label: '½', value: 1 / 2 },
+] as const;
 
 interface ItemListProps {
   items: BillItem[];
@@ -61,21 +38,24 @@ interface ItemListProps {
   admin?: boolean | undefined;
   itemReductions?: Record<string, number> | undefined;
   onReduceItem?: ((itemId: string, amount: number) => void) | undefined;
+  fractionMap?: Map<string, number>;
+  onFractionChange?: (itemId: string, fraction: number | undefined) => void;
 }
 
 interface ItemRowProps {
   item: BillItem;
   selected: boolean;
-  dupeColor: string | undefined;
   currencySymbol: string;
   participants: string[];
   onToggle: () => void;
   reduction: number;
   admin: boolean;
   onReduce: ((amount: number) => void) | undefined;
+  fraction: number | undefined;
+  onFractionChange: (fraction: number | undefined) => void;
 }
 
-function ItemRow({ item, selected, dupeColor: _dupeColor, currencySymbol, participants, onToggle, reduction, admin, onReduce }: ItemRowProps) {
+function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduction, admin, onReduce, fraction, onFractionChange }: ItemRowProps) {
   const otherParticipants = participants;
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -163,6 +143,40 @@ function ItemRow({ item, selected, dupeColor: _dupeColor, currencySymbol, partic
         </div>
       </button>
 
+      {/* Fraction selector — shown when item is selected */}
+      {selected && !ignored && (
+        <div className="px-4 pb-3 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+          {FRACTION_OPTIONS.map((opt) => {
+            const isActive = fraction !== undefined && Math.abs(fraction - opt.value) < 0.001;
+            return (
+              <button
+                key={opt.label}
+                onClick={() => onFractionChange(isActive ? undefined : opt.value)}
+                className={[
+                  'flex-1 rounded-xl py-1.5 text-sm font-semibold transition-colors border',
+                  isActive
+                    ? 'bg-accent/20 border-accent/50 text-accent'
+                    : 'bg-surface-elevated border-surface-border text-white/50 hover:text-white/80 hover:border-white/20',
+                ].join(' ')}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+          <button
+            onClick={() => onFractionChange(undefined)}
+            className={[
+              'flex-[2] rounded-xl py-1.5 text-sm font-semibold transition-colors border',
+              fraction === undefined
+                ? 'bg-accent/20 border-accent/50 text-accent'
+                : 'bg-surface-elevated border-surface-border text-white/50 hover:text-white/80 hover:border-white/20',
+            ].join(' ')}
+          >
+            חישוב אוטומטי
+          </button>
+        </div>
+      )}
+
       {admin && onReduce && !editing && (
         <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
           {ignored ? (
@@ -247,6 +261,8 @@ export function ItemList({
   admin,
   itemReductions,
   onReduceItem,
+  fractionMap,
+  onFractionChange,
 }: ItemListProps) {
   const originalTotal = items.reduce((sum, item) => sum + item.price, 0);
   const total = items.reduce((sum, item) => {
@@ -255,7 +271,6 @@ export function ItemList({
   }, 0);
   const hasReductions = total !== originalTotal;
   const currencySymbol = currency === 'ILS' ? '₪' : currency;
-  const dupeColors = buildDupeColorMap(items);
 
   if (items.length === 0) {
     return (
@@ -297,13 +312,14 @@ export function ItemList({
               key={item.id}
               item={item}
               selected={selectedIds.has(item.id)}
-              dupeColor={dupeColors.get(item.id)}
               currencySymbol={currencySymbol}
               participants={itemParticipants?.get(item.id) ?? []}
               onToggle={() => onToggle(item.id)}
               reduction={itemReductions?.[item.id] ?? 0}
               admin={!!admin}
               onReduce={onReduceItem ? (amount) => onReduceItem(item.id, amount) : undefined}
+              fraction={fractionMap?.get(item.id)}
+              onFractionChange={(f) => onFractionChange?.(item.id, f)}
             />
           ))}
         </div>

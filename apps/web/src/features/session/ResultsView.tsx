@@ -10,7 +10,7 @@ interface ResultsViewProps {
   onGoBack?: () => void;
 }
 
-const TIP_OPTIONS = [0, 5, 10, 12] as const;
+const TIP_OPTIONS = [0, 5, 10, 12, 15] as const;
 
 export function ResultsView({
   results,

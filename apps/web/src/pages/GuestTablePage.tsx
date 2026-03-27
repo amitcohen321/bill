@@ -3,6 +3,8 @@ import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageLayout } from '../components/ui/PageLayout';
 import { ItemList } from '../features/bill-review/ItemList';
+import { TipSelector } from '../features/bill-review/TipSelector';
+import { SelectionBar } from '../features/bill-review/SelectionBar';
 import { QRShare } from '../features/bill-review/QRShare';
 import { ResultsView } from '../features/session/ResultsView';
 import { Button } from '../components/ui/Button';
@@ -92,6 +94,33 @@ export function GuestTablePage() {
     const myDiner = sessionState?.diners.find((d) => d.dinerId === myDinerId);
     return new Set<string>(myDiner?.selectedItemIds ?? []);
   }, [sessionState, myDinerId]);
+
+  const [tipPercent, setTipPercent] = useState(0);
+  const [fractionMap, setFractionMap] = useState<Map<string, number>>(new Map());
+
+  function handleFractionChange(itemId: string, fraction: number | undefined) {
+    setFractionMap((prev) => {
+      const next = new Map(prev);
+      if (fraction === undefined) {
+        next.delete(itemId);
+      } else {
+        next.set(itemId, fraction);
+      }
+      return next;
+    });
+  }
+
+  const selectedSubtotal = useMemo(() => {
+    if (!extraction) return 0;
+    return extraction.items
+      .filter((item) => mySelectedIds.has(item.id))
+      .reduce((sum, item) => {
+        const reduction = sessionState?.itemReductions?.[item.id] ?? 0;
+        const basePrice = Math.max(0, item.price - reduction);
+        const fraction = fractionMap.get(item.id);
+        return sum + (fraction !== undefined ? basePrice * fraction : basePrice);
+      }, 0);
+  }, [extraction, mySelectedIds, sessionState?.itemReductions, fractionMap]);
 
   if (!tableId) return <Navigate to="/" replace />;
 
@@ -251,9 +280,18 @@ export function GuestTablePage() {
               admin={admin}
               itemReductions={sessionState?.itemReductions}
               onReduceItem={admin ? reduceItem : undefined}
+              fractionMap={fractionMap}
+              onFractionChange={handleFractionChange}
             />
           </>
         )}
+
+        <SelectionBar
+          count={mySelectedIds.size}
+          subtotal={selectedSubtotal}
+          tipPercent={tipPercent}
+          currency={extraction?.currency ?? 'ILS'}
+        />
 
         {/* Admin: calculate (first time) / recalculate (when editing) */}
         {admin && extraction && (!hasResults || showItemSelection) && (

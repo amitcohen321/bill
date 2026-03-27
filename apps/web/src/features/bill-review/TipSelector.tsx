@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '../../components/ui/Card';
 
-const PRESET_TIPS = [10, 12] as const;
+const PRESET_TIPS = [10, 12, 15] as const;
 
 interface TipSelectorProps {
   tipPercent: number;
@@ -64,7 +64,7 @@ export function TipSelector({ tipPercent, onTipChange }: TipSelectorProps) {
               : 'bg-surface-elevated border-surface-border text-white/60 hover:text-white hover:border-white/20',
           ].join(' ')}
         >
-          <span>מותאם %</span> <span>%</span>
+          מותאם %
         </button>
       </div>
 
