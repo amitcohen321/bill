@@ -145,9 +145,9 @@ function StepArrow() {
 
 function FeatureCard({ icon, text }: { icon: string; text: string }) {
   return (
-    <div className="flex-1 flex flex-col items-center gap-2 rounded-2xl bg-surface-card border border-surface-border px-3 py-3.5 text-center">
+    <div className="flex-1 flex flex-col items-center gap-2 px-3 py-3.5 text-center">
       <span className="text-2xl">{icon}</span>
-      <span className="text-white/80 text-xs font-medium leading-snug">{text}</span>
+      <span className="text-white/50 text-xs font-medium leading-snug">{text}</span>
     </div>
   );
 }

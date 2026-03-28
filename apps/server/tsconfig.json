@@ -6,10 +6,7 @@
     "target": "ES2021",
     "outDir": "./dist",
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "paths": {
-      "@bill/shared": ["../../packages/shared/src/index.ts"]
-    }
+    "experimentalDecorators": true
   },
   "include": ["src"]
 }
