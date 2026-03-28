@@ -19,7 +19,16 @@ export class GeminiExtractionService {
   async extractBillItems(imageBuffer: Buffer, mimeType: string): Promise<ExtractionResult> {
     const base64Image = imageBuffer.toString('base64');
 
-    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, extract ONLY the dish/food line items that are EXPLICITLY VISIBLE in the image.
+    const systemPrompt = `You are a bill extraction assistant. Given an image of a restaurant receipt or bill, your job is two steps:
+
+STEP 1 — IMAGE ENHANCEMENT (do this mentally before extracting):
+The image may be blurry, low-contrast, poorly lit, or at an angle. Before extracting anything:
+- Mentally enhance the image: boost contrast, sharpen text edges, correct skew
+- Re-read any characters that look ambiguous (e.g., 0 vs O, 1 vs l, 5 vs S) using context clues from surrounding text
+- Use the overall structure of the receipt (columns, alignment, repeating patterns) to resolve unclear regions
+
+STEP 2 — EXTRACT (only after enhancing):
+Extract ONLY the dish/food line items that are EXPLICITLY VISIBLE in the image.
 
 CRITICAL — NEVER HALLUCINATE:
 - ONLY extract items you can actually read in the image. Do NOT guess, infer, or invent any item names or prices.
