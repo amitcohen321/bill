@@ -16,6 +16,7 @@ export function HomePage() {
   const [nameInput, setNameInput] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef('');
 
   useEffect(() => {
@@ -102,10 +103,10 @@ export function HomePage() {
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center px-6 pt-12 pb-8 overflow-y-auto">
+      <div className="relative flex-1 flex flex-col items-center px-6 pt-12 pb-8 overflow-hidden">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3">
-          <img src="/hero.png" alt="Billy" className="w-72 h-72 sm:w-80 sm:h-80 object-contain drop-shadow-2xl" />
+          <img src="/hero.png" alt="Billy" className="w-52 h-52 object-contain drop-shadow-2xl" />
           <h1 className="text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
@@ -154,13 +155,33 @@ export function HomePage() {
             disabled={uploadMutation.isPending}
             onClick={() => cameraInputRef.current?.click()}
           >
-          צלם חשבון 
+          צלם חשבון
           </Button>
           <input
             ref={cameraInputRef}
             type="file"
             accept={ALLOWED_IMAGE_TYPES.join(',')}
             capture="environment"
+            onChange={handleCameraChange}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-surface-border" />
+            <span className="text-white/30 text-xs">או</span>
+            <div className="flex-1 h-px bg-surface-border" />
+          </div>
+          <button
+            disabled={uploadMutation.isPending}
+            onClick={() => galleryInputRef.current?.click()}
+            className="w-full h-14 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 text-white/50 text-base font-medium hover:border-accent/50 hover:text-white/80 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            ⬆️ העלה מהגלריה
+          </button>
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept={ALLOWED_IMAGE_TYPES.join(',')}
             onChange={handleCameraChange}
             className="hidden"
             aria-hidden="true"
