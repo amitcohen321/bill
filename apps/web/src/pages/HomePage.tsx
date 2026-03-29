@@ -84,7 +84,14 @@ export function HomePage() {
   }
 
   return (
-    <div className="h-dvh flex flex-col bg-surface">
+    <div
+      className="flex flex-col bg-surface overflow-hidden"
+      style={{
+        height: '100dvh',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
@@ -93,7 +100,7 @@ export function HomePage() {
 
       {/* Top-right — back to table */}
       {lastTableId && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-4 right-4 z-10" style={{ top: 'max(1rem, env(safe-area-inset-top))' }}>
           <button
             onClick={() => navigate(`/tables/${lastTableId}`)}
             className="flex items-center gap-1.5 rounded-2xl border border-surface-border bg-surface-elevated/80 backdrop-blur px-3 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
@@ -103,18 +110,18 @@ export function HomePage() {
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center px-6 pt-12 pb-8 overflow-hidden">
+      <div className="relative flex-1 flex flex-col items-center px-5 pt-4 pb-3 min-h-0">
         {/* Top — logo / branding */}
-        <div className="flex flex-col items-center gap-3">
-          <img src="/hero.png" alt="Billy" className="w-52 h-52 object-contain drop-shadow-2xl" />
-          <h1 className="text-3xl font-bold text-white tracking-tight">בילי</h1>
-          <p className="text-white/40 text-base text-center">
+        <div className="flex flex-col items-center gap-1 sm:gap-2">
+          <img src="/hero.png" alt="Billy" className="w-40 h-40 sm:w-56 sm:h-56 object-contain drop-shadow-2xl" />
+          <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight">בילי</h1>
+          <p className="text-white/40 text-xs sm:text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
           </p>
         </div>
 
         {/* Middle — feature highlights (horizontal) */}
-        <div className="w-full max-w-sm flex flex-col gap-3 mt-6">
+        <div className="w-full max-w-sm flex flex-col gap-1.5 mt-2 sm:mt-4">
           <div className="flex items-center gap-1">
             <FeatureCard icon="📸" text="צילום של החשבון" />
             <StepArrow />
@@ -130,7 +137,7 @@ export function HomePage() {
         </div>
 
         {/* Bottom — CTAs */}
-        <div className="w-full max-w-sm flex flex-col gap-4 mt-auto pt-6">
+        <div className="w-full max-w-sm flex flex-col gap-2 mt-auto pt-2 sm:pt-4">
           {uploadMutation.isPending && (
             <div className="flex flex-col gap-2">
               <Input
@@ -174,7 +181,7 @@ export function HomePage() {
           <button
             disabled={uploadMutation.isPending}
             onClick={() => galleryInputRef.current?.click()}
-            className="w-full h-14 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 text-white/50 text-base font-medium hover:border-accent/50 hover:text-white/80 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            className="w-full h-12 sm:h-14 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 text-white/50 text-sm sm:text-base font-medium hover:border-accent/50 hover:text-white/80 transition-colors disabled:opacity-50 disabled:pointer-events-none"
           >
             ⬆️ העלה מהגלריה
           </button>
@@ -187,7 +194,7 @@ export function HomePage() {
             aria-hidden="true"
           />
           {uploadMutation.isPending && (
-            <p className="text-center text-white/60 text-base font-medium">⏳ מעבד את הקבלה...</p>
+            <p className="text-center text-white/60 text-sm font-medium">⏳ מעבד את הקבלה...</p>
           )}
 
           <div className="flex items-center gap-3">
@@ -199,7 +206,7 @@ export function HomePage() {
           {/* Code entry */}
           <div className="flex flex-col gap-2">
             <div className={[
-              'flex flex-col rounded-2xl border bg-surface-elevated px-4 pt-3 pb-1 transition-colors',
+              'flex flex-col rounded-2xl border bg-surface-elevated px-4 pt-2 pb-1 transition-colors',
               joinError ? 'border-red-500/50' : 'border-surface-border focus-within:border-accent/40',
             ].join(' ')}>
               <span className="text-white/30 text-xs text-center">קוד הצטרפות לשולחן</span>
@@ -212,7 +219,7 @@ export function HomePage() {
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
                   placeholder="0000"
-                  className="w-full bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-2.5 outline-none placeholder-white/15"
+                  className="w-full bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-2 outline-none placeholder-white/15"
                 />
                 {joinMutation.isPending && (
                   <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />
@@ -225,7 +232,7 @@ export function HomePage() {
             )}
           </div>
 
-          <p className="text-center text-white/30 text-xs pb-2">
+          <p className="text-center text-white/30 text-xs pb-1">
             ללא הרשמה · ללא חשבון · מיידי
           </p>
         </div>
@@ -247,8 +254,8 @@ function StepArrow() {
 
 function FeatureCard({ icon, text }: { icon: string; text: string }) {
   return (
-    <div className="flex-1 flex flex-col items-center gap-2 px-3 py-3.5 text-center">
-      <span className="text-2xl">{icon}</span>
+    <div className="flex-1 flex flex-col items-center gap-1 px-2 py-2 sm:py-3.5 text-center">
+      <span className="text-xl sm:text-2xl">{icon}</span>
       <span className="text-white/50 text-xs font-medium leading-snug">{text}</span>
     </div>
   );
