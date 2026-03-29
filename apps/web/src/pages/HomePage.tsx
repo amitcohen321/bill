@@ -102,7 +102,7 @@ export function HomePage() {
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center px-6 py-8 overflow-y-auto">
+      <div className="relative flex-1 flex flex-col items-center px-6 pt-12 pb-8 overflow-y-auto">
         {/* Top — logo / branding */}
         <div className="flex flex-col items-center gap-3">
           <img src="/hero.png" alt="Billy" className="w-72 h-72 sm:w-80 sm:h-80 object-contain drop-shadow-2xl" />
