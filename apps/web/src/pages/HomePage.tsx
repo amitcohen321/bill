@@ -1,15 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_BYTES } from '@bill/shared';
 import { Button } from '../components/ui/Button';
-import { getTableByCode } from '../lib/api/tables';
+import { Input } from '../components/ui/Input';
+import { getTableByCode, createTable, uploadBillImage } from '../lib/api/tables';
 import { ApiError } from '../lib/api/client';
+import { setAdminToken } from '../lib/manager';
 
 export function HomePage() {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [lastTableId, setLastTableId] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState('');
+  const [fileError, setFileError] = useState<string | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef('');
 
   useEffect(() => {
     setLastTableId(sessionStorage.getItem('bill_last_table'));
@@ -26,6 +33,45 @@ export function HomePage() {
       );
     },
   });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const table = await createTable();
+      setAdminToken(table.tableId, table.adminToken);
+      try {
+        await uploadBillImage(table.tableId, file);
+      } catch (err) {
+        if (err instanceof ApiError && err.code === 'BILL_EXTRACTION_FAILED') {
+          await uploadBillImage(table.tableId, file);
+        } else {
+          throw err;
+        }
+      }
+      return table;
+    },
+    onSuccess: (table) => {
+      const name = nameRef.current.trim();
+      if (name) {
+        localStorage.setItem(`bill_name_${table.tableId}`, name);
+      }
+      navigate(`/tables/${table.tableId}`);
+    },
+  });
+
+  function handleCameraChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileError(null);
+    if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
+      setFileError('סוג קובץ לא נתמך. יש להעלות תמונה (JPG, PNG, WEBP, HEIC).');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setFileError('הקובץ גדול מדי. גודל מקסימלי: 10MB.');
+      return;
+    }
+    uploadMutation.mutate(file);
+  }
 
   function handleCodeChange(value: string) {
     setJoinError(null);
@@ -73,7 +119,7 @@ export function HomePage() {
             <StepArrow />
             <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
             <StepArrow />
-            <FeatureCard icon="✂️" text="פיצול קל בין כולם" />
+            <FeatureCard icon="👥" text="פיצול קל בין כולם" />
           </div>
           <div className="flex items-center justify-center gap-2">
             <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
@@ -84,9 +130,44 @@ export function HomePage() {
 
         {/* Bottom — CTAs */}
         <div className="w-full max-w-sm flex flex-col gap-4 mt-auto pt-6">
-          <Button size="lg" fullWidth onClick={() => navigate('/create-table')}>
-            צור שולחן
+          {uploadMutation.isPending && (
+            <div className="flex flex-col gap-2">
+              <Input
+                placeholder="מה שמך? (אופציונלי)"
+                value={nameInput}
+                onChange={(e) => {
+                  nameRef.current = e.target.value;
+                  setNameInput(e.target.value);
+                }}
+                autoFocus
+              />
+            </div>
+          )}
+          {fileError && <p className="text-red-400 text-sm text-center">{fileError}</p>}
+          {uploadMutation.isError && (
+            <p className="text-red-400 text-sm text-center">שגיאה בעיבוד הקבלה. נא לנסות שוב.</p>
+          )}
+          <Button
+            size="lg"
+            fullWidth
+            loading={uploadMutation.isPending}
+            disabled={uploadMutation.isPending}
+            onClick={() => cameraInputRef.current?.click()}
+          >
+          צלם חשבון 
           </Button>
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept={ALLOWED_IMAGE_TYPES.join(',')}
+            capture="environment"
+            onChange={handleCameraChange}
+            className="hidden"
+            aria-hidden="true"
+          />
+          {uploadMutation.isPending && (
+            <p className="text-center text-white/60 text-base font-medium">⏳ מעבד את הקבלה...</p>
+          )}
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-surface-border" />
