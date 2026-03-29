@@ -13,6 +13,7 @@ export function HomePage() {
   const [code, setCode] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [lastTableId, setLastTableId] = useState<string | null>(null);
+  const [isPwa] = useState(() => window.matchMedia('(display-mode: standalone)').matches);
   const [nameInput, setNameInput] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +114,7 @@ export function HomePage() {
       <div className="relative flex-1 flex flex-col items-center justify-center gap-6 px-5 pt-4 pb-3 min-h-0 overflow-y-auto">
         {/* Top — logo / branding + features */}
         <div className="flex flex-col items-center gap-1 sm:gap-2">
-          <img src="/hero.png" alt="Billy" className="w-36 h-36 sm:w-52 sm:h-52 object-contain drop-shadow-2xl" />
+          <img src="/hero.png" alt="Billy" className={`object-contain drop-shadow-2xl ${isPwa ? 'w-48 h-48 sm:w-64 sm:h-64' : 'w-36 h-36 sm:w-52 sm:h-52'}`} />
           <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-xs sm:text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
