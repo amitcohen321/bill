@@ -110,34 +110,34 @@ export function HomePage() {
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center px-5 pt-4 pb-3 min-h-0">
-        {/* Top — logo / branding */}
+      <div className="relative flex-1 flex flex-col items-center justify-between px-5 pt-4 pb-3 min-h-0">
+        {/* Top — logo / branding + features */}
         <div className="flex flex-col items-center gap-1 sm:gap-2">
-          <img src="/hero.png" alt="Billy" className="w-40 h-40 sm:w-56 sm:h-56 object-contain drop-shadow-2xl" />
+          <img src="/hero.png" alt="Billy" className="w-36 h-36 sm:w-52 sm:h-52 object-contain drop-shadow-2xl" />
           <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight">בילי</h1>
           <p className="text-white/40 text-xs sm:text-base text-center">
             פיצול חשבון מסעדה בקלות ובמהירות
           </p>
-        </div>
 
-        {/* Middle — feature highlights (horizontal) */}
-        <div className="w-full max-w-sm flex flex-col gap-1.5 mt-2 sm:mt-4">
-          <div className="flex items-center gap-1">
-            <FeatureCard icon="📸" text="צילום של החשבון" />
-            <StepArrow />
-            <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
-            <StepArrow />
-            <FeatureCard icon="👥" text="פיצול קל בין כולם" />
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
-              <span className="text-xs font-semibold text-accent tracking-wide whitespace-nowrap">✨ Powered by AI</span>
+          {/* Feature highlights (horizontal) */}
+          <div className="w-full max-w-sm flex flex-col gap-1.5 mt-2 sm:mt-4">
+            <div className="flex items-center gap-1">
+              <FeatureCard icon="📸" text="צילום של החשבון" />
+              <StepArrow />
+              <FeatureCard icon="🤖" text="חילוץ פריטים אוטומטי" />
+              <StepArrow />
+              <FeatureCard icon="👥" text="פיצול קל בין כולם" />
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1">
+                <span className="text-xs font-semibold text-accent tracking-wide whitespace-nowrap">✨ Powered by AI</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom — CTAs */}
-        <div className="w-full max-w-sm flex flex-col gap-2 mt-auto pt-2 sm:pt-4">
+        <div className="w-full max-w-sm flex flex-col gap-2 pt-2">
           {uploadMutation.isPending && (
             <div className="flex flex-col gap-2">
               <Input
