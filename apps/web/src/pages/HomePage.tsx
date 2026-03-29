@@ -110,7 +110,7 @@ export function HomePage() {
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center justify-between px-5 pt-4 pb-3 min-h-0">
+      <div className="relative flex-1 flex flex-col items-center justify-center gap-6 px-5 pt-4 pb-3 min-h-0 overflow-y-auto">
         {/* Top — logo / branding + features */}
         <div className="flex flex-col items-center gap-1 sm:gap-2">
           <img src="/hero.png" alt="Billy" className="w-36 h-36 sm:w-52 sm:h-52 object-contain drop-shadow-2xl" />
