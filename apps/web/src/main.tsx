@@ -1,4 +1,11 @@
 import { StrictMode } from 'react';
+
+// Reload the page when a new service worker takes over, so users always get the latest version
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';

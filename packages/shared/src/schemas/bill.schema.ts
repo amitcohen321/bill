@@ -24,7 +24,7 @@ export const ExtractionResultSchema = z.object({
   items: z.array(
     z.object({
       name: z.string(),
-      price: z.number().nonnegative(),
+      price: z.number(),
       category: ItemCategorySchema.default('other'),
     }),
   ),

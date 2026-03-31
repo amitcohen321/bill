@@ -118,12 +118,27 @@ Response format:
 
     this.logger.log(`Received response from Gemini: ${rawContent.slice(0, 300)}`);
 
+    // Strip markdown code fences if present (some models wrap JSON in ```json...```)
+    const cleaned = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawContent);
+      parsed = JSON.parse(cleaned);
     } catch {
-      this.logger.error('Failed to parse Gemini JSON response', rawContent);
-      throw new Error('Gemini returned invalid JSON');
+      // Fallback: extract JSON object between first { and last }
+      const start = cleaned.indexOf('{');
+      const end = cleaned.lastIndexOf('}');
+      if (start !== -1 && end > start) {
+        try {
+          parsed = JSON.parse(cleaned.slice(start, end + 1));
+        } catch {
+          this.logger.error(`Failed to parse Gemini JSON response (length: ${rawContent.length})`, rawContent.slice(0, 500));
+          throw new Error('Gemini returned invalid JSON');
+        }
+      } else {
+        this.logger.error(`Failed to parse Gemini JSON response (length: ${rawContent.length})`, rawContent.slice(0, 500));
+        throw new Error('Gemini returned invalid JSON');
+      }
     }
 
     const validated = ExtractionResultSchema.safeParse(parsed);

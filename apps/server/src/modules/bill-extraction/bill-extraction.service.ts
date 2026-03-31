@@ -49,7 +49,20 @@ export class BillExtractionService {
       this.logger.warn(`No items extracted from bill image for table ${tableId}`);
     }
 
-    const items = extractionResult.items.map((item) => ({
+    const mergedItems = extractionResult.items.reduce(
+      (acc, item) => {
+        if (item.price < 0 && acc.length > 0) {
+          const last = acc[acc.length - 1]!;
+          acc[acc.length - 1] = { ...last, price: last.price + item.price };
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      },
+      [] as typeof extractionResult.items,
+    );
+
+    const items = mergedItems.map((item) => ({
       id: uuidv4(),
       name: item.name,
       price: item.price,
