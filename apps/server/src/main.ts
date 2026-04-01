@@ -10,12 +10,12 @@ import type { Request, Response, NextFunction } from 'express';
 
 function resolvePublicDir(): string {
   const candidates = [
-    // From compiled __dirname (apps/server/dist/apps/server/src/) up to project root
-    join(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'web', 'dist'),
-    // From cwd (might be project root on Render)
+    // From cwd (project root on Render: node apps/server/dist/.../main.js)
     join(process.cwd(), 'apps', 'web', 'dist'),
-    // From cwd if started from apps/server/
+    // From cwd if started from apps/server/ directory
     join(process.cwd(), '..', 'web', 'dist'),
+    // From compiled __dirname (apps/server/dist/apps/server/src/) up 6 levels to project root
+    join(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'web', 'dist'),
     // From __dirname with fewer levels (in case nest build output changes)
     join(__dirname, '..', '..', '..', '..', 'apps', 'web', 'dist'),
   ];
@@ -30,6 +30,10 @@ function resolvePublicDir(): string {
   }
 
   // Fallback to first candidate even if not found
+  Logger.error(
+    `Web dist NOT found in any candidate path — SPA fallback will be disabled! Candidates tried: ${candidates.join(', ')}`,
+    'Bootstrap',
+  );
   return candidates[0]!;
 }
 

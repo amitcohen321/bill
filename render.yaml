@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: bill
+    runtime: node
+    plan: free
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && pnpm build
+    startCommand: node apps/server/dist/apps/server/src/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
