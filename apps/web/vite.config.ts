@@ -31,7 +31,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/socket\.io\//],
+        navigateFallbackDenylist: [/^\/api/, /^\/socket\.io/],
       },
     }),
   ],

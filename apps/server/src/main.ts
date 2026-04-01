@@ -8,12 +8,40 @@ import { GlobalHttpExceptionFilter } from './common/filters/global-http-exceptio
 import { Logger } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
 
+function resolvePublicDir(): string {
+  const candidates = [
+    // From compiled __dirname (apps/server/dist/apps/server/src/) up to project root
+    join(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'web', 'dist'),
+    // From cwd (might be project root on Render)
+    join(process.cwd(), 'apps', 'web', 'dist'),
+    // From cwd if started from apps/server/
+    join(process.cwd(), '..', 'web', 'dist'),
+    // From __dirname with fewer levels (in case nest build output changes)
+    join(__dirname, '..', '..', '..', '..', 'apps', 'web', 'dist'),
+  ];
+
+  for (const dir of candidates) {
+    const indexPath = join(dir, 'index.html');
+    if (existsSync(indexPath)) {
+      Logger.log(`Found web dist at ${dir}`, 'Bootstrap');
+      return dir;
+    }
+    Logger.warn(`Tried ${dir} — index.html not found`, 'Bootstrap');
+  }
+
+  // Fallback to first candidate even if not found
+  return candidates[0]!;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['log', 'warn', 'error'],
   });
 
-  const publicDir = join(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'web', 'dist');
+  Logger.log(`__dirname: ${__dirname}`, 'Bootstrap');
+  Logger.log(`cwd: ${process.cwd()}`, 'Bootstrap');
+
+  const publicDir = resolvePublicDir();
   app.useStaticAssets(publicDir);
 
   app.setGlobalPrefix('api');
@@ -29,7 +57,7 @@ async function bootstrap() {
   let indexHtml = '';
   if (existsSync(indexPath)) {
     indexHtml = readFileSync(indexPath, 'utf-8');
-    Logger.log(`SPA fallback loaded from ${indexPath}`, 'Bootstrap');
+    Logger.log(`SPA fallback loaded (${indexHtml.length} bytes)`, 'Bootstrap');
   } else {
     Logger.warn(`index.html not found at ${indexPath} — SPA fallback disabled`, 'Bootstrap');
   }
