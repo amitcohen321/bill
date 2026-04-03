@@ -1,20 +1,40 @@
 import { useState } from 'react';
 
+const TIP_OPTIONS = [0, 5, 10, 12] as const;
+
 interface SelectionBarProps {
   count: number;
-  subtotal: number;
   tipPercent: number;
-  currency: string;
-  onApprove?: () => void;
+  onTipChange: (percent: number) => void;
 }
 
-export function SelectionBar({ count, subtotal, tipPercent, currency }: SelectionBarProps) {
-  const [rounded, setRounded] = useState(false);
-  const currencySymbol = currency === 'ILS' ? '₪' : currency;
+export function SelectionBar({ count, tipPercent, onTipChange }: SelectionBarProps) {
+  const [customActive, setCustomActive] = useState(false);
+  const [customValue, setCustomValue] = useState('');
   const visible = count > 0;
-  const grandTotal = subtotal * (1 + tipPercent / 100);
-  const displayTotal = rounded ? Math.round(grandTotal) : grandTotal;
-  const hasTip = tipPercent > 0;
+
+  function selectPreset(pct: number) {
+    setCustomActive(false);
+    setCustomValue('');
+    onTipChange(tipPercent === pct ? 0 : pct);
+  }
+
+  function activateCustom() {
+    setCustomActive(true);
+    onTipChange(0);
+  }
+
+  function handleCustomChange(raw: string) {
+    setCustomValue(raw);
+    const parsed = parseFloat(raw);
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+      onTipChange(parsed);
+    } else {
+      onTipChange(0);
+    }
+  }
+
+  const isPresetActive = (pct: number) => !customActive && tipPercent === pct;
 
   return (
     <div
@@ -23,39 +43,46 @@ export function SelectionBar({ count, subtotal, tipPercent, currency }: Selectio
         visible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0',
       ].join(' ')}
     >
-      <div className="pointer-events-auto rounded-3xl border border-accent/30 bg-surface-elevated/90 backdrop-blur-xl shadow-glow px-5 py-4 flex items-center justify-between gap-4">
-        <div className="flex flex-col min-w-0 gap-0.5">
-          <span className="text-white/50 text-xs font-medium">
-            {count} {count === 1 ? 'פריט' : 'פריטים'} נבחרו
-          </span>
+      <div className="pointer-events-auto rounded-3xl border border-accent/30 bg-surface-elevated/90 backdrop-blur-xl shadow-glow px-5 py-4 flex flex-col gap-3">
+        <p className="text-white/60 text-sm font-medium">טיפ לצוות</p>
 
-          {hasTip && (
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-white/40 text-xs tabular-nums line-through">
-                {currencySymbol}{subtotal.toFixed(2)}
-              </span>
-              <span className="text-accent/70 text-xs font-medium">
-                +{tipPercent % 1 === 0 ? tipPercent : tipPercent.toFixed(1)}% טיפ
-              </span>
-            </div>
+        <div className="flex gap-2">
+          {TIP_OPTIONS.map((pct) => (
+            <button
+              key={pct}
+              onClick={() => selectPreset(pct)}
+              className={[
+                'flex-1 rounded-xl py-1.5 text-sm font-semibold transition-colors',
+                isPresetActive(pct)
+                  ? 'bg-accent text-black'
+                  : 'bg-surface-card border-surface-border border text-white/60 hover:text-white',
+              ].join(' ')}
+            >
+              {pct}%
+            </button>
+          ))}
+
+          {customActive ? (
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.5}
+              value={customValue}
+              onChange={(e) => handleCustomChange(e.target.value)}
+              placeholder="0"
+              autoFocus
+              className="bg-accent/20 border-accent/50 focus:border-accent w-20 rounded-xl border px-2 py-1.5 text-center text-sm font-semibold text-white outline-none placeholder:text-white/30"
+            />
+          ) : (
+            <button
+              onClick={activateCustom}
+              className="flex-1 bg-surface-card border-surface-border rounded-xl border py-1.5 text-sm font-semibold text-white/60 transition-colors hover:text-white"
+            >
+              % מותאם
+            </button>
           )}
-
-          <span className="text-white font-bold text-2xl tabular-nums leading-tight">
-            {currencySymbol}{rounded ? displayTotal : grandTotal.toFixed(2)}
-          </span>
         </div>
-
-        <button
-          onClick={() => setRounded((r) => !r)}
-          className={[
-            'flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors duration-150',
-            rounded
-              ? 'bg-accent text-black border-accent'
-              : 'bg-transparent text-white/60 border-white/20 hover:border-white/40',
-          ].join(' ')}
-        >
-          עיגול סכום
-        </button>
       </div>
     </div>
   );

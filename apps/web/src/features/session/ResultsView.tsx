@@ -8,6 +8,7 @@ interface ResultsViewProps {
   items: BillItem[];
   admin?: boolean;
   onGoBack?: () => void;
+  initialTipPct?: number;
 }
 
 const TIP_OPTIONS = [0, 5, 10, 12, 15] as const;
@@ -18,11 +19,14 @@ export function ResultsView({
   items,
   admin = false,
   onGoBack,
+  initialTipPct = 0,
 }: ResultsViewProps) {
   const navigate = useNavigate();
-  const [tipPct, setTipPct] = useState<number>(0);
+  const [tipPct, setTipPct] = useState<number>(initialTipPct);
   const [customTip, setCustomTip] = useState<string>('');
-  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [isCustomMode, setIsCustomMode] = useState(
+    initialTipPct > 0 && !(TIP_OPTIONS as readonly number[]).includes(initialTipPct),
+  );
   const [roundUp, setRoundUp] = useState(false);
   const [showAdminDetails, setShowAdminDetails] = useState<boolean>(false);
   const currencySymbol = results.currency === 'ILS' ? '₪' : results.currency;
@@ -114,7 +118,7 @@ export function ResultsView({
             <span>⚠️</span>
             <span>
               נותר לתשלום: {currencySymbol}
-              {(originalTotal - paidTotal).toFixed(2)} - לא כל הסכום חולק
+              {(originalTotal - paidTotal).toFixed(2)} 
             </span>
           </p>
           {unclaimedItems.length > 0 && (
@@ -154,7 +158,7 @@ export function ResultsView({
                   : 'border-white/20 bg-transparent text-white/60 hover:border-white/40',
               ].join(' ')}
             >
-              עיגול סכום
+              עגל סכום
             </button>
           </div>
 

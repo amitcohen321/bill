@@ -144,7 +144,7 @@ function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduc
       </button>
 
       {/* Fraction selector — shown when item is selected */}
-      {selected && !ignored && (
+      {/* {selected && !ignored && (
         <div className="px-4 pb-3 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
           {FRACTION_OPTIONS.map((opt) => {
             const isActive = fraction !== undefined && Math.abs(fraction - opt.value) < 0.001;
@@ -175,7 +175,7 @@ function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduc
             חישוב אוטומטי
           </button>
         </div>
-      )}
+      )} */}
 
       {admin && onReduce && !editing && (
         <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
