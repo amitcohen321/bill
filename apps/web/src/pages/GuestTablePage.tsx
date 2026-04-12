@@ -246,7 +246,7 @@ export function GuestTablePage() {
         )}
 
         {/* Admin: recalculate (shown when results exist but someone changed their items) */}
-        {admin && hasResults && !showItemSelection && sessionState?.resultsStale && (
+        {myDiner?.isAdmin && hasResults && !showItemSelection && sessionState?.resultsStale && (
           <Button size="lg" fullWidth onClick={calculate}>
             התבצעו שינויים - חשב מחדש
           </Button>
@@ -284,7 +284,7 @@ export function GuestTablePage() {
         )}
 
         {/* Admin: calculate (first time) / recalculate (when editing) */}
-        {admin && extraction && (!hasResults || showItemSelection) && (
+        {myDiner?.isAdmin && extraction && (!hasResults || showItemSelection) && (
           <div className="flex flex-col gap-3 pt-2">
             {/* Participants status */}
             {sessionState && sessionState.diners.length > 0 && (
