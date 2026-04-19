@@ -65,6 +65,7 @@ export function GuestTablePage() {
     setDone,
     reduceItem,
     calculate,
+    setPartySize,
   } = useTableSession(tableId ?? '', adminToken, submittedName, nameSubmitted);
 
   // When new results arrive (recalculated), show results view again
@@ -82,7 +83,8 @@ export function GuestTablePage() {
     for (const diner of sessionState.diners) {
       for (const itemId of diner.selectedItemIds) {
         const list = map.get(itemId) ?? [];
-        list.push(diner.name ? `${diner.animal} ${diner.name}` : diner.animal);
+        const partySuffix = diner.partySize > 1 ? ` +${diner.partySize - 1}` : '';
+        list.push(diner.name ? `${diner.animal} ${diner.name}${partySuffix}` : `${diner.animal}${partySuffix}`);
         map.set(itemId, list);
       }
     }
@@ -271,6 +273,8 @@ export function GuestTablePage() {
               onReduceItem={admin ? reduceItem : undefined}
               fractionMap={fractionMap}
               onFractionChange={handleFractionChange}
+              myPartySize={myDiner?.partySize ?? 1}
+              onPartyChange={setPartySize}
             />
           </>
         )}

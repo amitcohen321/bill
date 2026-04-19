@@ -207,10 +207,10 @@ export function HomePage() {
           {/* Code entry */}
           <div className="flex flex-col gap-2">
             <div className={[
-              'flex flex-col rounded-2xl border bg-surface-elevated px-4 pt-2 pb-1 transition-colors',
-              joinError ? 'border-red-500/50' : 'border-surface-border focus-within:border-accent/40',
+              'flex flex-col rounded-2xl border-2 bg-surface-elevated px-4 pt-3 pb-2 transition-colors',
+              joinError ? 'border-red-500/70' : 'border-accent/30 focus-within:border-accent/70',
             ].join(' ')}>
-              <span className="text-white/30 text-xs text-center">קוד הצטרפות לשולחן</span>
+              <span className="text-accent/80 text-xs font-semibold text-center tracking-wide uppercase">קוד הצטרפות לשולחן</span>
               <div className="flex items-center justify-center gap-2">
                 <input
                   type="text"
@@ -220,7 +220,7 @@ export function HomePage() {
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
                   placeholder="0000"
-                  className="w-full bg-transparent text-white text-center text-2xl font-bold tabular-nums tracking-[0.3em] py-2 outline-none placeholder-white/15"
+                  className="w-full bg-transparent text-white text-center text-3xl font-bold tabular-nums tracking-[0.4em] py-2 outline-none placeholder-white/25"
                 />
                 {joinMutation.isPending && (
                   <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />

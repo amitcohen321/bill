@@ -141,8 +141,11 @@ export function ResultsView({
       {myResult && (
         <div className="bg-accent/10 border-accent/30 rounded-3xl border p-5 text-center">
           <p className="mb-1 text-lg font-medium text-white/60">
-            הסכום שלך {myResult.animal}
+            הסכום {myResult.partySize > 1 ? 'שלכם' : 'שלך'} {myResult.animal}
             {myResult.name ? ` (${myResult.name})` : ''}
+            {myResult.partySize > 1 && (
+              <span className="ml-1 text-accent text-sm font-bold"> + {myResult.partySize - 1}</span>
+            )}
           </p>
           <div className="flex items-center justify-center gap-3">
             <p className="text-accent text-5xl font-bold tabular-nums">
@@ -161,6 +164,15 @@ export function ResultsView({
               עגל סכום
             </button>
           </div>
+          {myResult.partySize > 1 && (
+            <div className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-accent/20 bg-accent/5 px-4 py-2">
+              <span className="text-white/50 text-sm">{myResult.partySize} אנשים ×</span>
+              <span className="text-accent font-bold text-lg tabular-nums">
+                {currencySymbol}{(totalWithTip / myResult.partySize).toFixed(2)}
+              </span>
+              <span className="text-white/50 text-sm">לאדם</span>
+            </div>
+          )}
 
           {/* Tip selector */}
           <div className="mt-4">
@@ -289,15 +301,25 @@ export function ResultsView({
                   {result.name && (
                     <span className="text-sm font-medium text-white">{result.name}</span>
                   )}
+                  {result.partySize > 1 && (
+                    <span className="text-accent text-xs font-bold">+{result.partySize - 1}</span>
+                  )}
                   {result.dinerId === myDinerId && (
                     <span className="text-accent text-xs font-medium">אתה</span>
                   )}
                 </div>
-                <span className="font-bold tabular-nums text-white">
-                  {result.dinerId === myDinerId
-                    ? `${currencySymbol}${roundUp ? totalWithTip : totalWithTip.toFixed(2)}`
-                    : `${currencySymbol}${result.total.toFixed(2)}`}
-                </span>
+                <div className="flex flex-col items-end">
+                  <span className="font-bold tabular-nums text-white">
+                    {result.dinerId === myDinerId
+                      ? `${currencySymbol}${roundUp ? totalWithTip : totalWithTip.toFixed(2)}`
+                      : `${currencySymbol}${result.total.toFixed(2)}`}
+                  </span>
+                  {result.partySize > 1 && (
+                    <span className="text-xs tabular-nums text-accent/70">
+                      {currencySymbol}{(result.dinerId === myDinerId ? totalWithTip : result.total / result.partySize).toFixed(2)} × {result.partySize}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Admin details - show each diner's items */}

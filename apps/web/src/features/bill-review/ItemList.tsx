@@ -40,6 +40,8 @@ interface ItemListProps {
   onReduceItem?: ((itemId: string, amount: number) => void) | undefined;
   fractionMap?: Map<string, number>;
   onFractionChange?: (itemId: string, fraction: number | undefined) => void;
+  myPartySize?: number;
+  onPartyChange?: (size: number) => void;
 }
 
 interface ItemRowProps {
@@ -263,6 +265,8 @@ export function ItemList({
   onReduceItem,
   fractionMap,
   onFractionChange,
+  myPartySize = 1,
+  onPartyChange,
 }: ItemListProps) {
   const originalTotal = items.reduce((sum, item) => sum + item.price, 0);
   const total = items.reduce((sum, item) => {
@@ -340,6 +344,39 @@ export function ItemList({
           </span>
         </div>
       </Card>
+
+      {onPartyChange && (
+        <div className={[
+          'flex items-center justify-between rounded-2xl border px-4 py-3 transition-colors',
+          myPartySize > 1 ? 'bg-accent/10 border-accent/30' : 'bg-surface-elevated border-surface-border',
+        ].join(' ')}>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-white/80">הזמנו אותו הדבר</span>
+            <span className="text-xs text-white/40">
+              {myPartySize > 1 ? `אתה + ${myPartySize - 1} נוספים` : 'רק אתה'}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onPartyChange(Math.max(1, myPartySize - 1))}
+              disabled={myPartySize <= 1}
+              className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/70 text-lg font-bold hover:border-accent/50 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              −
+            </button>
+            <span className={['text-xl font-bold tabular-nums w-5 text-center', myPartySize > 1 ? 'text-accent' : 'text-white'].join(' ')}>
+              {myPartySize}
+            </span>
+            <button
+              onClick={() => onPartyChange(Math.min(10, myPartySize + 1))}
+              disabled={myPartySize >= 10}
+              className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/70 text-lg font-bold hover:border-accent/50 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      )}
 
       {onSetDone && (
         <Button

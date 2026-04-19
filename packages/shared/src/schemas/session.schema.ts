@@ -7,6 +7,7 @@ export const DinerSchema = z.object({
   isAdmin: z.boolean(),
   selectedItemIds: z.array(z.string()),
   isDone: z.boolean(),
+  partySize: z.number().int().min(1).max(10).default(1),
 });
 
 export type Diner = z.infer<typeof DinerSchema>;
@@ -17,6 +18,7 @@ export const DinerResultSchema = z.object({
   name: z.string().optional(),
   selectedItemIds: z.array(z.string()),
   total: z.number(),
+  partySize: z.number().int().min(1).default(1),
 });
 
 export type DinerResult = z.infer<typeof DinerResultSchema>;
@@ -59,3 +61,9 @@ export const ReduceItemPayloadSchema = z.object({
 });
 
 export type ReduceItemPayload = z.infer<typeof ReduceItemPayloadSchema>;
+
+export const SetPartySizePayloadSchema = z.object({
+  size: z.number().int().min(1).max(10),
+});
+
+export type SetPartySizePayload = z.infer<typeof SetPartySizePayloadSchema>;

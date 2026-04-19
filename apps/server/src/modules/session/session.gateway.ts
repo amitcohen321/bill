@@ -105,6 +105,26 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('set-party-size')
+  handleSetPartySize(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: unknown,
+  ) {
+    const size =
+      typeof payload === 'object' && payload !== null
+        ? (payload as Record<string, unknown>)['size']
+        : undefined;
+    if (typeof size !== 'number' || !Number.isInteger(size) || size < 1 || size > 10) {
+      client.emit('error', { code: 'INVALID_PAYLOAD', message: 'Invalid set-party-size payload' });
+      return;
+    }
+
+    const { tableId, session } = this.sessionService.setPartySize(client.id, size);
+    if (tableId && session) {
+      this.server.to(tableId).emit('session-state', this.sessionService.toSessionState(session));
+    }
+  }
+
   @SubscribeMessage('reduce-item')
   handleReduceItem(
     @ConnectedSocket() client: Socket,

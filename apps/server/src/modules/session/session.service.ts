@@ -11,6 +11,7 @@ interface DinerRecord {
   selectedItemIds: string[];
   isDone: boolean;
   socketId: string;
+  partySize: number;
 }
 
 interface SessionRecord {
@@ -69,6 +70,7 @@ export class SessionService {
       selectedItemIds: [],
       isDone: false,
       socketId,
+      partySize: 1,
     };
     session.diners.set(dinerId, diner);
     session.socketToDiner.set(socketId, dinerId);
@@ -141,6 +143,23 @@ export class SessionService {
     return { tableId: null, session: null };
   }
 
+  setPartySize(socketId: string, size: number): { tableId: string | null; session: SessionRecord | null } {
+    for (const [tableId, session] of this.sessions) {
+      const dinerId = session.socketToDiner.get(socketId);
+      if (dinerId !== undefined) {
+        const diner = session.diners.get(dinerId);
+        if (diner) {
+          diner.partySize = Math.max(1, Math.min(10, size));
+          if (session.results) {
+            session.resultsStale = true;
+          }
+        }
+        return { tableId, session };
+      }
+    }
+    return { tableId: null, session: null };
+  }
+
   reduceItem(
     socketId: string,
     itemId: string,
@@ -204,12 +223,12 @@ export class SessionService {
           }
         }
 
-        // Count how many diners selected each item (for equal split)
+        // Count how many "people" selected each item (each diner counts as their partySize)
         const itemParticipantCount = new Map<string, number>();
         for (const d of session.diners.values()) {
           for (const itemId of d.selectedItemIds) {
             if (!ignoredItems.has(itemId)) {
-              itemParticipantCount.set(itemId, (itemParticipantCount.get(itemId) ?? 0) + 1);
+              itemParticipantCount.set(itemId, (itemParticipantCount.get(itemId) ?? 0) + d.partySize);
             }
           }
         }
@@ -220,7 +239,8 @@ export class SessionService {
             if (ignoredItems.has(itemId)) continue;
             const price = priceMap.get(itemId) ?? 0;
             const count = itemParticipantCount.get(itemId) ?? 1;
-            total += price / count;
+            // This diner's share = price * (their partySize / total participants)
+            total += price * (d.partySize / count);
           }
           return {
             dinerId: d.dinerId,
@@ -228,6 +248,7 @@ export class SessionService {
             name: d.name,
             selectedItemIds: [...d.selectedItemIds],
             total: Math.round(total * 100) / 100,
+            partySize: d.partySize,
           };
         });
 
@@ -254,6 +275,7 @@ export class SessionService {
         isAdmin: d.isAdmin,
         selectedItemIds: [...d.selectedItemIds],
         isDone: d.isDone,
+        partySize: d.partySize,
       })),
       itemReductions: Object.fromEntries(session.itemReductions),
       results: session.results,

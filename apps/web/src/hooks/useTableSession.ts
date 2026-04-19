@@ -77,6 +77,10 @@ export function useTableSession(tableId: string, adminToken: string | null, name
     socketRef.current?.emit('calculate');
   }, []);
 
+  const setPartySize = useCallback((size: number) => {
+    socketRef.current?.emit('set-party-size', { size });
+  }, []);
+
   return {
     sessionState,
     myDinerId,
@@ -86,5 +90,6 @@ export function useTableSession(tableId: string, adminToken: string | null, name
     setDone,
     reduceItem,
     calculate,
+    setPartySize,
   };
 }
