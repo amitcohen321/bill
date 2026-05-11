@@ -4,6 +4,7 @@ import { configuration } from './common/config/configuration';
 import { TablesModule } from './modules/tables/tables.module';
 import { BillExtractionModule } from './modules/bill-extraction/bill-extraction.module';
 import { SessionModule } from './modules/session/session.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { SessionModule } from './modules/session/session.module';
     BillExtractionModule,
     SessionModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

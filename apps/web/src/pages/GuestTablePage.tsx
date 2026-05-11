@@ -56,6 +56,10 @@ export function GuestTablePage() {
     retry: 1,
   });
 
+  useEffect(() => {
+    if (isError) navigate('/', { replace: true });
+  }, [isError, navigate]);
+
   const {
     sessionState,
     myDinerId,
