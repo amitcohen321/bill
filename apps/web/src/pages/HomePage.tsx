@@ -142,7 +142,7 @@ export function HomePage() {
           {uploadMutation.isPending && (
             <div className="flex flex-col gap-2">
               <Input
-                placeholder="מה שמך? (אופציונלי)"
+                placeholder="מה שמך?"
                 value={nameInput}
                 onChange={(e) => {
                   nameRef.current = e.target.value;

@@ -100,8 +100,15 @@ export function GuestTablePage() {
     return new Set<string>(myDiner?.selectedItemIds ?? []);
   }, [sessionState, myDinerId]);
 
-  const [tipPercent, setTipPercent] = useState(0);
+  const [tipPercent] = useState(0);
   const [fractionMap, setFractionMap] = useState<Map<string, number>>(new Map());
+
+  const selectedSum = useMemo(() => {
+    if (!extraction) return 0;
+    return extraction.items
+      .filter((item) => mySelectedIds.has(item.id))
+      .reduce((sum, item) => sum + item.price, 0);
+  }, [extraction, mySelectedIds]);
 
   function handleFractionChange(itemId: string, fraction: number | undefined) {
     setFractionMap((prev) => {
@@ -286,8 +293,8 @@ export function GuestTablePage() {
         {extraction && (!hasResults || showItemSelection) && (
           <SelectionBar
             count={mySelectedIds.size}
-            tipPercent={tipPercent}
-            onTipChange={setTipPercent}
+            selectedSum={selectedSum}
+            currency={extraction.currency}
           />
         )}
 
