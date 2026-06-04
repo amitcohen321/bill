@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE_BYTES } from '@bill/shared';
 import { Button } from '../components/ui/Button';
@@ -10,6 +10,7 @@ import { setAdminToken } from '../lib/manager';
 
 export function HomePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [code, setCode] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [lastTableId, setLastTableId] = useState<string | null>(null);
@@ -35,6 +36,15 @@ export function HomePage() {
       );
     },
   });
+
+  // Auto-join when ?code=XXXX is in the URL (e.g. from QR code scan)
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    if (codeParam && /^\d{4}$/.test(codeParam)) {
+      joinMutation.mutate(codeParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {

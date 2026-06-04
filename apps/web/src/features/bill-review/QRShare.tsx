@@ -10,12 +10,15 @@ interface QRShareProps {
 
 export function QRShare({ tableId }: QRShareProps) {
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/tables/${tableId}`;
 
   const { data: table } = useQuery({
     queryKey: ['table', tableId],
     queryFn: () => getTable(tableId),
   });
+
+  const url = table?.code
+    ? `${window.location.origin}/?code=${table.code}`
+    : `${window.location.origin}/tables/${tableId}`;
 
   function handleCopy() {
     void navigator.clipboard.writeText(url).then(() => {
