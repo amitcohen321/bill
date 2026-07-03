@@ -6,6 +6,7 @@ import { ItemList } from '../features/bill-review/ItemList';
 import { SelectionBar } from '../features/bill-review/SelectionBar';
 import { QRShare } from '../features/bill-review/QRShare';
 import { ResultsView } from '../features/session/ResultsView';
+import { DinersStatus } from '../features/session/DinersStatus';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { getTable } from '../lib/api/tables';
@@ -270,6 +271,10 @@ export function GuestTablePage() {
           <>
             <h2 className="text-2xl font-bold text-white">בחר את הפריטים שלך</h2>
 
+            {sessionState && sessionState.diners.length > 0 && (
+              <DinersStatus diners={sessionState.diners} myDinerId={myDinerId} />
+            )}
+
             <ItemList
               items={extraction.items}
               currency={extraction.currency}
@@ -301,43 +306,6 @@ export function GuestTablePage() {
         {/* Admin: calculate (first time) / recalculate (when editing) */}
         {myDiner?.isAdmin && extraction && (!hasResults || showItemSelection) && (
           <div className="flex flex-col gap-3 pt-2">
-            {/* Participants status */}
-            {sessionState && sessionState.diners.length > 0 && (
-              <div className="bg-surface-card border-surface-border rounded-2xl border p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
-                  סטטוס סועדים
-                </p>
-                <div className="flex flex-col gap-2">
-                  {sessionState.diners.map((diner) => (
-                    <div
-                      key={diner.dinerId}
-                      className="bg-surface-elevated flex items-center justify-between rounded-2xl px-3 py-2"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{diner.animal}</span>
-                        <div className="flex flex-col">
-                          {diner.name && (
-                            <span className="text-base font-semibold leading-tight text-white">
-                              {diner.name}
-                            </span>
-                          )}
-                          <span className="text-sm text-white/60">
-                            {diner.isDone ? '✅ סיים לבחור' : 'עדיין בוחר...'}
-                          </span>
-                        </div>
-                      </div>
-                      {diner.isAdmin && (
-                        <span className="text-accent text-xs font-medium">מנהל</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-white/40">
-                  {sessionState.diners.filter((d) => d.isDone).length} /{' '}
-                  {sessionState.diners.length} סיימו
-                </p>
-              </div>
-            )}
             <Button size="lg" fullWidth onClick={calculate} disabled={!allDone}>
               {hasResults ? 'התבצעו שינויים - חשב מחדש' : 'כולם בחרו - חשב חלוקה'}
             </Button>
