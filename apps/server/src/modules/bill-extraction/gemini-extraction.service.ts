@@ -41,7 +41,9 @@ Rules:
 - Extract only individual dish or food item names and their prices
 - Do NOT include: totals, subtotals, tax, service charges, tips, restaurant name, date, table number, or any other metadata
 - Preserve item names exactly as printed, but clean obvious OCR noise (e.g., remove random special characters)
-- If the same item appears multiple times, include each occurrence separately
+- ALWAYS split quantities into individual per-unit items. If a line shows a quantity greater than 1 (e.g., "4 x Beer 80", "3 Pizza 60", "x2 Coke 20"), emit that many separate items, one per unit, each with the per-unit price (80/4 = 20, 60/3 = 20, 20/2 = 10). Never emit a single row with an aggregate quantity price.
+- If the same item appears on multiple separate lines, include each occurrence separately as its own row.
+- The goal is: every physical dish/drink served becomes its own row in the output, so each diner can pick one instance independently.
 - Detect the currency if possible (default to ILS if unclear)
 - Classify each item into exactly one category: "starter", "main", "dessert", "drink", or "other"
   - "starter": appetizers, soups, salads, bread, dips served before the main course
