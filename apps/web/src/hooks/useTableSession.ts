@@ -48,7 +48,15 @@ export function useTableSession(tableId: string, adminToken: string | null, name
 
     socket.connect();
 
+    // When the user closes the tab / leaves the app (incl. mobile), proactively
+    // disconnect so the server removes them from the session immediately.
+    const handlePageHide = () => {
+      socket.disconnect();
+    };
+    window.addEventListener('pagehide', handlePageHide);
+
     return () => {
+      window.removeEventListener('pagehide', handlePageHide);
       socket.disconnect();
       socketRef.current = null;
     };

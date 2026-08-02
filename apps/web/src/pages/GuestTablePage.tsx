@@ -104,12 +104,28 @@ export function GuestTablePage() {
   const [tipPercent] = useState(0);
   const [fractionMap, setFractionMap] = useState<Map<string, number>>(new Map());
 
+  // Live split total: each selected item's price is divided among everyone who
+  // picked it (party-size weighted), matching the server's calculation — so the
+  // bottom bar reflects the real split as people choose, not the full price.
   const selectedSum = useMemo(() => {
-    if (!extraction) return 0;
+    if (!extraction || !sessionState) return 0;
+    const participantCount = new Map<string, number>();
+    for (const diner of sessionState.diners) {
+      for (const itemId of diner.selectedItemIds) {
+        participantCount.set(itemId, (participantCount.get(itemId) ?? 0) + diner.partySize);
+      }
+    }
+    const myPartySize =
+      sessionState.diners.find((d) => d.dinerId === myDinerId)?.partySize ?? 1;
     return extraction.items
       .filter((item) => mySelectedIds.has(item.id))
-      .reduce((sum, item) => sum + item.price, 0);
-  }, [extraction, mySelectedIds]);
+      .reduce((sum, item) => {
+        const reduction = sessionState.itemReductions?.[item.id] ?? 0;
+        const price = Math.max(0, item.price - reduction);
+        const count = participantCount.get(item.id) ?? 1;
+        return sum + price * (myPartySize / count);
+      }, 0);
+  }, [extraction, mySelectedIds, sessionState, myDinerId]);
 
   function handleFractionChange(itemId: string, fraction: number | undefined) {
     setFractionMap((prev) => {

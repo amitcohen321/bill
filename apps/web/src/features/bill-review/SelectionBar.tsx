@@ -9,7 +9,7 @@ interface SelectionBarProps {
 const TIP_OPTIONS = [0, 5, 10, 12, 15] as const;
 
 export function SelectionBar({ count, selectedSum, currency }: SelectionBarProps) {
-  const visible = count > 0;
+  const visible = true;
   const [tipPct, setTipPct] = useState<number>(0);
 
   const tipAmount = selectedSum * (tipPct / 100);
@@ -28,11 +28,11 @@ export function SelectionBar({ count, selectedSum, currency }: SelectionBarProps
             {count} {count === 1 ? 'פריט' : 'פריטים'} נבחרו
           </p>
           <div className="flex flex-col items-end">
-            {tipPct > 0 && (
-              <span className="text-white/40 text-xs tabular-nums">
-                כולל טיפ {tipPct}% ({currency}{tipAmount.toFixed(2)})
-              </span>
-            )}
+            <span className="text-white/40 text-xs">
+              {tipPct > 0
+                ? `החלק שלך כולל טיפ ${tipPct}% (${currency}${tipAmount.toFixed(2)})`
+                : 'החלק שלך (אחרי חלוקה)'}
+            </span>
             <p className="text-white text-lg font-bold tabular-nums">
               {currency}{totalWithTip.toFixed(2)}
             </p>

@@ -26,7 +26,13 @@ function isTogglePayload(data: unknown): data is { itemId: string } {
   );
 }
 
-@WebSocketGateway({ cors: { origin: true } })
+@WebSocketGateway({
+  cors: { origin: true },
+  // Detect gone clients quickly (e.g. phone locked / app closed without a
+  // clean disconnect) so they're removed from the session promptly.
+  pingInterval: 10000,
+  pingTimeout: 5000,
+})
 export class SessionGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;

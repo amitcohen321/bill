@@ -80,6 +80,18 @@ export function ResultsView({
     [items, itemSplitMap],
   );
 
+  // How many "people" share each item (party-size weighted, matching the
+  // server's split logic) so we can show each diner's real share per item.
+  const itemParticipantCount = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const diner of results.dinerResults) {
+      for (const itemId of diner.selectedItemIds) {
+        map.set(itemId, (map.get(itemId) ?? 0) + diner.partySize);
+      }
+    }
+    return map;
+  }, [results]);
+
   // Map items to diners who selected them
   const itemToDinersMap = useMemo(() => {
     const map = new Map<string, Array<{ animal: string; name?: string; dinerId: string }>>();
@@ -246,13 +258,23 @@ export function ResultsView({
                 if (!item) return null;
                 const diners = itemToDinersMap.get(itemId) ?? [];
                 const otherDiners = diners.filter((d) => d.dinerId !== myDinerId);
+                const shareCount = itemParticipantCount.get(itemId) ?? 1;
+                const myShare = item.price * ((myResult.partySize ?? 1) / shareCount);
+                const isSplit = shareCount > (myResult.partySize ?? 1);
                 return (
                   <div key={itemId} className="flex flex-col gap-0.5 py-0.5 text-sm">
                     <div className="flex justify-between text-white/70">
                       <span>{item.name}</span>
                       <span className="tabular-nums text-white/50">
                         {currencySymbol}
-                        {item.price.toFixed(2)}
+                        {myShare.toFixed(2)}
+                        {isSplit && (
+                          <span className="text-white/30">
+                            {' '}
+                            ({currencySymbol}
+                            {item.price.toFixed(2)} ÷ {shareCount})
+                          </span>
+                        )}
                       </span>
                     </div>
                     <div className="text-right text-xs text-white/40">
@@ -329,12 +351,21 @@ export function ResultsView({
                     result.selectedItemIds.map((itemId) => {
                       const item = priceMap.get(itemId);
                       if (!item) return null;
+                      const shareCount = itemParticipantCount.get(itemId) ?? 1;
+                      const share = item.price * ((result.partySize ?? 1) / shareCount);
+                      const isSplit = shareCount > (result.partySize ?? 1);
                       return (
                         <div key={itemId} className="flex justify-between gap-2">
                           <span>{item.name}</span>
                           <span className="tabular-nums">
                             {currencySymbol}
-                            {item.price.toFixed(2)}
+                            {share.toFixed(2)}
+                            {isSplit && (
+                              <span className="text-white/30">
+                                {' '}
+                                (÷{shareCount})
+                              </span>
+                            )}
                           </span>
                         </div>
                       );
