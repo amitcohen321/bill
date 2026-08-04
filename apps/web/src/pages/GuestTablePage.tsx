@@ -104,11 +104,12 @@ export function GuestTablePage() {
   const [tipPercent] = useState(0);
   const [fractionMap, setFractionMap] = useState<Map<string, number>>(new Map());
 
-  // Live split total: each selected item's price is divided among everyone who
-  // picked it (party-size weighted), matching the server's calculation — so the
-  // bottom bar reflects the real split as people choose, not the full price.
-  const selectedSum = useMemo(() => {
-    if (!extraction || !sessionState) return 0;
+  // My live split share per item: each item's price divided among everyone who
+  // picked it (party-size weighted, matching the server). `splitCount` is how
+  // many "people" share it, so the UI can show "₪50 · ÷2".
+  const mySplitShares = useMemo(() => {
+    const map = new Map<string, { share: number; splitCount: number }>();
+    if (!extraction || !sessionState) return map;
     const participantCount = new Map<string, number>();
     for (const diner of sessionState.diners) {
       for (const itemId of diner.selectedItemIds) {
@@ -117,15 +118,22 @@ export function GuestTablePage() {
     }
     const myPartySize =
       sessionState.diners.find((d) => d.dinerId === myDinerId)?.partySize ?? 1;
-    return extraction.items
-      .filter((item) => mySelectedIds.has(item.id))
-      .reduce((sum, item) => {
-        const reduction = sessionState.itemReductions?.[item.id] ?? 0;
-        const price = Math.max(0, item.price - reduction);
-        const count = participantCount.get(item.id) ?? 1;
-        return sum + price * (myPartySize / count);
-      }, 0);
+    for (const item of extraction.items) {
+      if (!mySelectedIds.has(item.id)) continue;
+      const reduction = sessionState.itemReductions?.[item.id] ?? 0;
+      const price = Math.max(0, item.price - reduction);
+      const splitCount = participantCount.get(item.id) ?? 1;
+      map.set(item.id, { share: price * (myPartySize / splitCount), splitCount });
+    }
+    return map;
   }, [extraction, mySelectedIds, sessionState, myDinerId]);
+
+  // Live split total for the bottom bar = sum of my per-item shares.
+  const selectedSum = useMemo(() => {
+    let sum = 0;
+    for (const { share } of mySplitShares.values()) sum += share;
+    return sum;
+  }, [mySplitShares]);
 
   function handleFractionChange(itemId: string, fraction: number | undefined) {
     setFractionMap((prev) => {
@@ -298,6 +306,7 @@ export function GuestTablePage() {
               selectedIds={mySelectedIds}
               onToggle={toggleItem}
               itemParticipants={itemParticipants}
+              splitShares={mySplitShares}
               isDone={myDiner?.isDone}
               onSetDone={setDone}
               admin={admin}

@@ -33,6 +33,7 @@ interface ItemListProps {
   selectedIds: Set<string>;
   onToggle: (id: string) => void;
   itemParticipants?: Map<string, string[]>; // itemId → animal emojis
+  splitShares?: Map<string, { share: number; splitCount: number }>; // itemId → my split share
   isDone?: boolean | undefined;
   onSetDone?: (() => void) | undefined;
   admin?: boolean | undefined;
@@ -55,9 +56,10 @@ interface ItemRowProps {
   onReduce: ((amount: number) => void) | undefined;
   fraction: number | undefined;
   onFractionChange: (fraction: number | undefined) => void;
+  split: { share: number; splitCount: number } | undefined;
 }
 
-function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduction, admin, onReduce, fraction, onFractionChange }: ItemRowProps) {
+function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduction, admin, onReduce, fraction, onFractionChange, split }: ItemRowProps) {
   const otherParticipants = participants;
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -140,6 +142,11 @@ function ItemRow({ item, selected, currencySymbol, participants, onToggle, reduc
           ) : (
             <span className={['font-semibold text-xl tabular-nums', selected ? 'text-accent' : 'text-accent/70'].join(' ')}>
               {currencySymbol}{item.price.toFixed(2)}
+            </span>
+          )}
+          {!ignored && selected && split && split.splitCount > 1 && (
+            <span className="mt-1 rounded-full bg-accent/20 px-2 py-0.5 text-xs font-bold text-accent tabular-nums">
+              חלקך {currencySymbol}{split.share.toFixed(2)} · ÷{split.splitCount}
             </span>
           )}
         </div>
@@ -258,6 +265,7 @@ export function ItemList({
   selectedIds,
   onToggle,
   itemParticipants,
+  splitShares,
   isDone,
   onSetDone,
   admin,
@@ -324,6 +332,7 @@ export function ItemList({
               onReduce={onReduceItem ? (amount) => onReduceItem(item.id, amount) : undefined}
               fraction={fractionMap?.get(item.id)}
               onFractionChange={(f) => onFractionChange?.(item.id, f)}
+              split={splitShares?.get(item.id)}
             />
           ))}
         </div>
